@@ -1,12 +1,12 @@
 [build]
-  command = "npm run build"
-  # 优化安装命令：使用国内镜像源，增加超时时间和重试次数，限制并发数避免超时
-  install = "npm config set registry https://registry.npmmirror.com && npm config set fetch-timeout 300000 && npm config set fetch-retries 5 && npm config set maxsockets 1 && npm ci --no-audit --prefer-offline --legacy-peer-deps"
+  command = "pnpm run build"
+  # 使用 pnpm 安装依赖：更快、更节省空间
+  install = "npm install -g pnpm@latest && pnpm install --frozen-lockfile --prefer-offline"
 
 [build.environment]
   NODE_VERSION = "22.21.1"
-  # npm 安装优化标志
-  NPM_FLAGS = "--no-audit --prefer-offline --legacy-peer-deps"
+  # pnpm 配置
+  PNPM_FLAGS = "--frozen-lockfile --prefer-offline"
   # 禁用进度条和详细日志，减少输出时间
   NPM_CONFIG_PROGRESS = "false"
   NPM_CONFIG_LOGGER = "error"
@@ -14,6 +14,6 @@
   NPM_CONFIG_FETCH_TIMEOUT = "300000"
   # 增加重试次数到 5 次
   NPM_CONFIG_FETCH_RETRIES = "5"
-  # 限制并发连接数，避免过多并发导致超时
-  NPM_CONFIG_MAXSOCKETS = "1"
+  # pnpm 网络并发数
+  PNPM_NETWORK_CONCURRENCY = "5"
 
