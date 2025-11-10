@@ -4,7 +4,12 @@ import {
   ThunderboltOutlined,
   BellOutlined,
   RocketOutlined,
-  BugOutlined
+  BugOutlined,
+  EyeOutlined,
+  TagOutlined,
+  SmileOutlined,
+  FormOutlined,
+  MobileOutlined
 } from '@ant-design/icons';
 
 // 根因分析Agent配置
@@ -1148,10 +1153,744 @@ export const firstFrameOptimizationConfig = {
   ]
 };
 
+// 白屏检测Agent配置
+export const blankScreenDetectionConfig = {
+  id: 'blank-screen-detection',
+  name: '白屏检测Agent',
+  title: "I'm Blank Screen Detection Agent",
+  description: '我可以帮你检测和分析应用白屏问题，快速定位原因并提供解决方案',
+  icon: <EyeOutlined />,
+  gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+  agents: [
+    { id: 'blank-screen', name: '白屏检测' },
+    { id: 'error-analysis', name: '错误分析' },
+    { id: 'recovery', name: '恢复方案' }
+  ],
+  problemTypes: [
+    {
+      id: 'detection',
+      name: '白屏检测',
+      cases: [
+        {
+          id: 'js_error',
+          title: 'JavaScript错误导致白屏',
+          description: `白屏检测报告：
+检测时间: 2024-11-10 15:30:00
+页面URL: https://app.example.com/home
+设备信息: iPhone 14 Pro, iOS 17.2
+浏览器: Safari 17.2
+App版本: 8.5.2
+
+检测结果：
+- 页面状态: 白屏
+- 错误类型: JavaScript执行错误
+- 错误信息: Uncaught TypeError: Cannot read property 'map' of undefined
+- 错误位置: main.js:1234
+- 影响用户数: 1,234
+
+错误堆栈：
+at HomePage.render (main.js:1234:15)
+at ReactDOM.render (react-dom.js:5678:12)
+at App.init (app.js:234:56)
+
+可能原因：
+1. 数据未正确初始化
+2. API返回数据格式异常
+3. 组件渲染逻辑错误`,
+          fullContent: `白屏检测报告：
+检测时间: 2024-11-10 15:30:00
+页面URL: https://app.example.com/home
+设备信息: iPhone 14 Pro, iOS 17.2
+浏览器: Safari 17.2
+App版本: 8.5.2
+
+检测结果：
+- 页面状态: 白屏
+- 错误类型: JavaScript执行错误
+- 错误信息: Uncaught TypeError: Cannot read property 'map' of undefined
+- 错误位置: main.js:1234
+- 影响用户数: 1,234
+
+错误堆栈：
+at HomePage.render (main.js:1234:15)
+at ReactDOM.render (react-dom.js:5678:12)
+at App.init (app.js:234:56)
+
+可能原因：
+1. 数据未正确初始化
+2. API返回数据格式异常
+3. 组件渲染逻辑错误`
+        },
+        {
+          id: 'network_error',
+          title: '网络请求失败导致白屏',
+          description: `白屏检测报告：
+检测时间: 2024-11-10 16:20:00
+页面URL: https://app.example.com/list
+设备信息: Xiaomi 13, Android 14
+浏览器: Chrome 120
+App版本: 8.5.2
+
+检测结果：
+- 页面状态: 白屏
+- 错误类型: 网络请求失败
+- 错误信息: Failed to fetch /api/v1/list
+- HTTP状态码: 500
+- 影响用户数: 567
+
+网络请求详情：
+- 请求URL: /api/v1/list
+- 请求方法: GET
+- 请求时间: 2024-11-10 16:20:00
+- 响应时间: 超时（>30秒）
+- 重试次数: 3次均失败
+
+可能原因：
+1. 后端服务异常
+2. 网络连接问题
+3. API接口变更`,
+          fullContent: `白屏检测报告：
+检测时间: 2024-11-10 16:20:00
+页面URL: https://app.example.com/list
+设备信息: Xiaomi 13, Android 14
+浏览器: Chrome 120
+App版本: 8.5.2
+
+检测结果：
+- 页面状态: 白屏
+- 错误类型: 网络请求失败
+- 错误信息: Failed to fetch /api/v1/list
+- HTTP状态码: 500
+- 影响用户数: 567
+
+网络请求详情：
+- 请求URL: /api/v1/list
+- 请求方法: GET
+- 请求时间: 2024-11-10 16:20:00
+- 响应时间: 超时（>30秒）
+- 重试次数: 3次均失败
+
+可能原因：
+1. 后端服务异常
+2. 网络连接问题
+3. API接口变更`
+        },
+        {
+          id: 'resource_load_fail',
+          title: '资源加载失败导致白屏',
+          description: `白屏检测报告：
+检测时间: 2024-11-10 17:10:00
+页面URL: https://app.example.com/detail
+设备信息: Huawei P60 Pro, HarmonyOS 4.0
+浏览器: 系统浏览器
+App版本: 8.5.2
+
+检测结果：
+- 页面状态: 白屏
+- 错误类型: 关键资源加载失败
+- 失败资源: main.css, vendor.js
+- 影响用户数: 890
+
+资源加载详情：
+- main.css: 404 Not Found
+- vendor.js: 加载超时
+- 关键资源缺失导致页面无法渲染
+
+可能原因：
+1. CDN资源路径错误
+2. 资源文件被删除
+3. 缓存配置问题`,
+          fullContent: `白屏检测报告：
+检测时间: 2024-11-10 17:10:00
+页面URL: https://app.example.com/detail
+设备信息: Huawei P60 Pro, HarmonyOS 4.0
+浏览器: 系统浏览器
+App版本: 8.5.2
+
+检测结果：
+- 页面状态: 白屏
+- 错误类型: 关键资源加载失败
+- 失败资源: main.css, vendor.js
+- 影响用户数: 890
+
+资源加载详情：
+- main.css: 404 Not Found
+- vendor.js: 加载超时
+- 关键资源缺失导致页面无法渲染
+
+可能原因：
+1. CDN资源路径错误
+2. 资源文件被删除
+3. 缓存配置问题`
+        }
+      ]
+    }
+  ],
+  analysisSteps: [
+    { title: '白屏检测', description: '自动检测页面白屏问题' },
+    { title: '错误分析', description: '分析导致白屏的根本原因' },
+    { title: '影响评估', description: '评估问题的影响范围和严重程度' },
+    { title: '解决方案', description: '提供针对性的解决方案' },
+    { title: '预防措施', description: '建议预防措施避免再次发生' }
+  ],
+  capabilities: [
+    {
+      id: 'detection',
+      name: '自动检测',
+      description: '自动检测应用白屏问题'
+    },
+    {
+      id: 'analysis',
+      name: '错误分析',
+      description: '深入分析白屏的根本原因'
+    },
+    {
+      id: 'solution',
+      name: '解决方案',
+      description: '提供快速有效的解决方案'
+    }
+  ]
+};
+
+// 收藏标签生成Agent配置
+export const favoriteTagGenerationConfig = {
+  id: 'favorite-tag-generation',
+  name: '收藏标签生成Agent',
+  title: "I'm Favorite Tag Generation Agent",
+  description: '我可以根据用户收藏内容智能生成个性化标签，提升内容组织和检索效率',
+  icon: <TagOutlined />,
+  gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+  agents: [
+    { id: 'tag-generation', name: '标签生成' },
+    { id: 'content-analysis', name: '内容分析' },
+    { id: 'tag-optimization', name: '标签优化' }
+  ],
+  problemTypes: [
+    {
+      id: 'generation',
+      name: '标签生成',
+      cases: [
+        {
+          id: 'auto_tag',
+          title: '自动生成收藏标签',
+          description: `收藏内容：
+标题: "2024年最新iPhone 15 Pro Max使用体验分享"
+内容: "刚入手iPhone 15 Pro Max，分享一下使用体验。拍照功能真的很强大，夜景模式特别出色。A17 Pro芯片性能强劲，玩游戏完全不卡顿。电池续航也比上一代好很多，一天重度使用没问题。就是价格有点贵，不过整体还是很满意的。"
+收藏时间: 2024-11-10 14:30:00
+
+生成的标签：
+- iPhone
+- 手机评测
+- 数码产品
+- 使用体验
+- 拍照
+- 性能
+- 电池续航
+
+标签生成逻辑：
+1. 提取关键词：iPhone、拍照、性能、电池
+2. 内容分类：数码产品、手机评测
+3. 情感标签：使用体验、满意`,
+          fullContent: `收藏内容：
+标题: "2024年最新iPhone 15 Pro Max使用体验分享"
+内容: "刚入手iPhone 15 Pro Max，分享一下使用体验。拍照功能真的很强大，夜景模式特别出色。A17 Pro芯片性能强劲，玩游戏完全不卡顿。电池续航也比上一代好很多，一天重度使用没问题。就是价格有点贵，不过整体还是很满意的。"
+收藏时间: 2024-11-10 14:30:00
+
+生成的标签：
+- iPhone
+- 手机评测
+- 数码产品
+- 使用体验
+- 拍照
+- 性能
+- 电池续航
+
+标签生成逻辑：
+1. 提取关键词：iPhone、拍照、性能、电池
+2. 内容分类：数码产品、手机评测
+3. 情感标签：使用体验、满意`
+        },
+        {
+          id: 'batch_tag',
+          title: '批量生成标签',
+          description: `批量收藏内容：
+1. "React Hooks最佳实践指南"
+2. "Vue 3 Composition API详解"
+3. "TypeScript高级类型系统"
+4. "Next.js 14新特性介绍"
+5. "前端性能优化技巧"
+
+生成的标签：
+- 前端开发
+- JavaScript框架
+- React
+- Vue
+- TypeScript
+- Next.js
+- 性能优化
+- 最佳实践
+
+标签分类：
+- 技术栈：React、Vue、TypeScript、Next.js
+- 主题：前端开发、性能优化
+- 类型：教程、最佳实践`,
+          fullContent: `批量收藏内容：
+1. "React Hooks最佳实践指南"
+2. "Vue 3 Composition API详解"
+3. "TypeScript高级类型系统"
+4. "Next.js 14新特性介绍"
+5. "前端性能优化技巧"
+
+生成的标签：
+- 前端开发
+- JavaScript框架
+- React
+- Vue
+- TypeScript
+- Next.js
+- 性能优化
+- 最佳实践
+
+标签分类：
+- 技术栈：React、Vue、TypeScript、Next.js
+- 主题：前端开发、性能优化
+- 类型：教程、最佳实践`
+        },
+        {
+          id: 'smart_tag',
+          title: '智能标签推荐',
+          description: `用户收藏历史分析：
+- 收藏了50篇关于"机器学习"的文章
+- 收藏了30篇关于"Python编程"的内容
+- 收藏了20篇关于"数据分析"的教程
+
+新收藏内容：
+标题: "深度学习在图像识别中的应用"
+
+智能推荐标签：
+- 机器学习（基于历史偏好）
+- 深度学习（内容主题）
+- 图像识别（内容关键词）
+- Python（可能相关技术栈）
+- 计算机视觉（相关领域）
+
+推荐理由：
+1. 与用户历史收藏高度相关
+2. 补充了新的技术领域
+3. 符合用户学习路径`,
+          fullContent: `用户收藏历史分析：
+- 收藏了50篇关于"机器学习"的文章
+- 收藏了30篇关于"Python编程"的内容
+- 收藏了20篇关于"数据分析"的教程
+
+新收藏内容：
+标题: "深度学习在图像识别中的应用"
+
+智能推荐标签：
+- 机器学习（基于历史偏好）
+- 深度学习（内容主题）
+- 图像识别（内容关键词）
+- Python（可能相关技术栈）
+- 计算机视觉（相关领域）
+
+推荐理由：
+1. 与用户历史收藏高度相关
+2. 补充了新的技术领域
+3. 符合用户学习路径`
+        }
+      ]
+    }
+  ],
+  analysisSteps: [
+    { title: '内容分析', description: '分析收藏内容的主题和关键词' },
+    { title: '标签生成', description: '基于内容生成相关标签' },
+    { title: '标签优化', description: '优化标签的准确性和相关性' },
+    { title: '个性化推荐', description: '基于用户历史推荐个性化标签' },
+    { title: '标签应用', description: '应用生成的标签到收藏内容' }
+  ],
+  capabilities: [
+    {
+      id: 'analysis',
+      name: '内容分析',
+      description: '智能分析收藏内容的主题和特征'
+    },
+    {
+      id: 'generation',
+      name: '标签生成',
+      description: '自动生成准确相关的标签'
+    },
+    {
+      id: 'recommendation',
+      name: '智能推荐',
+      description: '基于用户偏好推荐个性化标签'
+    }
+  ]
+};
+
+// 表情推荐Agent配置
+export const emojiRecommendationConfig = {
+  id: 'emoji-recommendation',
+  name: '表情推荐Agent',
+  title: "I'm Emoji Recommendation Agent",
+  description: '我可以根据文本内容智能推荐合适的表情符号，让表达更加生动有趣',
+  icon: <SmileOutlined />,
+  gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+  agents: [
+    { id: 'emoji-recommendation', name: '表情推荐' },
+    { id: 'sentiment-analysis', name: '情感分析' },
+    { id: 'context-understanding', name: '上下文理解' }
+  ],
+  problemTypes: [
+    {
+      id: 'recommendation',
+      name: '表情推荐',
+      cases: [
+        {
+          id: 'text_emoji',
+          title: '文本表情推荐',
+          description: `输入文本：
+"今天天气真好，心情特别愉快！"
+
+推荐表情：
+😊 😄 🌞 ✨ 🎉 💕
+
+推荐理由：
+- 😊：表达愉快的心情
+- 😄：表示开心大笑
+- 🌞：对应"天气真好"
+- ✨：表示美好、闪亮
+- 🎉：表达庆祝、高兴
+- 💕：表示喜爱、美好
+
+情感分析：
+- 情感倾向：积极正面
+- 情感强度：高
+- 主要情绪：开心、愉悦`,
+          fullContent: `输入文本：
+"今天天气真好，心情特别愉快！"
+
+推荐表情：
+😊 😄 🌞 ✨ 🎉 💕
+
+推荐理由：
+- 😊：表达愉快的心情
+- 😄：表示开心大笑
+- 🌞：对应"天气真好"
+- ✨：表示美好、闪亮
+- 🎉：表达庆祝、高兴
+- 💕：表示喜爱、美好
+
+情感分析：
+- 情感倾向：积极正面
+- 情感强度：高
+- 主要情绪：开心、愉悦`
+        },
+        {
+          id: 'context_emoji',
+          title: '上下文表情推荐',
+          description: `对话上下文：
+用户A: "我刚刚完成了一个大项目！"
+用户B: "太厉害了！"
+
+推荐回复表情：
+🎉 🎊 👏 🏆 ⭐ 🎈
+
+推荐理由：
+- 🎉：庆祝完成项目
+- 🎊：表示庆祝、恭喜
+- 👏：表示赞赏、鼓掌
+- 🏆：表示成就、胜利
+- ⭐：表示优秀、出色
+- 🎈：表示庆祝、欢乐
+
+上下文理解：
+- 场景：工作成就分享
+- 关系：朋友/同事
+- 语气：祝贺、鼓励`,
+          fullContent: `对话上下文：
+用户A: "我刚刚完成了一个大项目！"
+用户B: "太厉害了！"
+
+推荐回复表情：
+🎉 🎊 👏 🏆 ⭐ 🎈
+
+推荐理由：
+- 🎉：庆祝完成项目
+- 🎊：表示庆祝、恭喜
+- 👏：表示赞赏、鼓掌
+- 🏆：表示成就、胜利
+- ⭐：表示优秀、出色
+- 🎈：表示庆祝、欢乐
+
+上下文理解：
+- 场景：工作成就分享
+- 关系：朋友/同事
+- 语气：祝贺、鼓励`
+        },
+        {
+          id: 'smart_emoji',
+          title: '智能表情组合',
+          description: `输入文本：
+"今天加班到很晚，有点累但是很有成就感"
+
+推荐表情组合：
+😴 💪 ⭐ 🌙 ✨
+
+组合说明：
+- 😴：表示"累"的状态
+- 💪：表示"有成就感"、"努力"
+- ⭐：表示"成就"、"出色"
+- 🌙：对应"很晚"的时间
+- ✨：表示"美好"、"闪亮"
+
+情感分析：
+- 混合情感：疲惫但满足
+- 主要情绪：成就感、满足感
+- 次要情绪：疲惫`,
+          fullContent: `输入文本：
+"今天加班到很晚，有点累但是很有成就感"
+
+推荐表情组合：
+😴 💪 ⭐ 🌙 ✨
+
+组合说明：
+- 😴：表示"累"的状态
+- 💪：表示"有成就感"、"努力"
+- ⭐：表示"成就"、"出色"
+- 🌙：对应"很晚"的时间
+- ✨：表示"美好"、"闪亮"
+
+情感分析：
+- 混合情感：疲惫但满足
+- 主要情绪：成就感、满足感
+- 次要情绪：疲惫`
+        }
+      ]
+    }
+  ],
+  analysisSteps: [
+    { title: '文本分析', description: '分析文本内容和情感倾向' },
+    { title: '上下文理解', description: '理解对话或文本的上下文' },
+    { title: '表情匹配', description: '匹配合适的情感表情' },
+    { title: '推荐排序', description: '根据相关性排序推荐表情' },
+    { title: '组合优化', description: '优化表情组合的搭配' }
+  ],
+  capabilities: [
+    {
+      id: 'sentiment',
+      name: '情感分析',
+      description: '分析文本的情感倾向和情绪'
+    },
+    {
+      id: 'matching',
+      name: '表情匹配',
+      description: '智能匹配合适的情感表情'
+    },
+    {
+      id: 'recommendation',
+      name: '智能推荐',
+      description: '推荐最合适的表情组合'
+    }
+  ]
+};
+
+// 自动反馈表单填写Agent配置
+export const autoFeedbackFormConfig = {
+  id: 'auto-feedback-form',
+  name: '自动反馈表单填写Agent',
+  title: "I'm Auto Feedback Form Agent",
+  description: '我可以自动识别问题并智能填写反馈表单，提升用户反馈效率',
+  icon: <FormOutlined />,
+  gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+  agents: [
+    { id: 'form-filling', name: '表单填写' },
+    { id: 'problem-identification', name: '问题识别' },
+    { id: 'content-generation', name: '内容生成' }
+  ],
+  problemTypes: [
+    {
+      id: 'filling',
+      name: '表单填写',
+      cases: [
+        {
+          id: 'crash_feedback',
+          title: '崩溃问题自动反馈',
+          description: `问题信息：
+- 问题类型: 应用崩溃
+- 发生时间: 2024-11-10 15:30:00
+- 设备信息: iPhone 14 Pro, iOS 17.2
+- App版本: 8.5.2
+- 崩溃堆栈: (已自动收集)
+
+自动填写的表单：
+问题标题: "应用在浏览商品详情页时崩溃"
+问题描述: "在浏览商品详情页时，应用突然崩溃退出。设备为iPhone 14 Pro，系统版本iOS 17.2，App版本8.5.2。崩溃发生在2024-11-10 15:30:00。已附上崩溃堆栈信息。"
+问题类型: 崩溃
+严重程度: 高
+影响范围: 单个用户
+复现步骤: 
+1. 打开App
+2. 进入商品列表页
+3. 点击某个商品进入详情页
+4. 应用崩溃
+
+附加信息:
+- 设备型号: iPhone 14 Pro
+- 系统版本: iOS 17.2
+- App版本: 8.5.2
+- 崩溃堆栈: (已自动附加)`,
+          fullContent: `问题信息：
+- 问题类型: 应用崩溃
+- 发生时间: 2024-11-10 15:30:00
+- 设备信息: iPhone 14 Pro, iOS 17.2
+- App版本: 8.5.2
+- 崩溃堆栈: (已自动收集)
+
+自动填写的表单：
+问题标题: "应用在浏览商品详情页时崩溃"
+问题描述: "在浏览商品详情页时，应用突然崩溃退出。设备为iPhone 14 Pro，系统版本iOS 17.2，App版本8.5.2。崩溃发生在2024-11-10 15:30:00。已附上崩溃堆栈信息。"
+问题类型: 崩溃
+严重程度: 高
+影响范围: 单个用户
+复现步骤: 
+1. 打开App
+2. 进入商品列表页
+3. 点击某个商品进入详情页
+4. 应用崩溃
+
+附加信息:
+- 设备型号: iPhone 14 Pro
+- 系统版本: iOS 17.2
+- App版本: 8.5.2
+- 崩溃堆栈: (已自动附加)`
+        },
+        {
+          id: 'performance_feedback',
+          title: '性能问题自动反馈',
+          description: `问题信息：
+- 问题类型: 性能问题
+- 页面: 首页
+- 问题: 加载缓慢
+- 加载时间: 8秒
+- 设备信息: Xiaomi 13, Android 14
+
+自动填写的表单：
+问题标题: "首页加载速度过慢"
+问题描述: "首页加载时间过长，平均需要8秒才能完全显示内容。设备为Xiaomi 13，系统版本Android 14，App版本8.5.2。严重影响用户体验。"
+问题类型: 性能问题
+严重程度: 中
+影响范围: 部分用户
+性能数据:
+- 首屏加载时间: 8秒
+- 资源加载时间: 6秒
+- 接口响应时间: 3秒
+
+优化建议:
+- 优化资源加载策略
+- 减少首屏资源大小
+- 优化接口响应速度`,
+          fullContent: `问题信息：
+- 问题类型: 性能问题
+- 页面: 首页
+- 问题: 加载缓慢
+- 加载时间: 8秒
+- 设备信息: Xiaomi 13, Android 14
+
+自动填写的表单：
+问题标题: "首页加载速度过慢"
+问题描述: "首页加载时间过长，平均需要8秒才能完全显示内容。设备为Xiaomi 13，系统版本Android 14，App版本8.5.2。严重影响用户体验。"
+问题类型: 性能问题
+严重程度: 中
+影响范围: 部分用户
+性能数据:
+- 首屏加载时间: 8秒
+- 资源加载时间: 6秒
+- 接口响应时间: 3秒
+
+优化建议:
+- 优化资源加载策略
+- 减少首屏资源大小
+- 优化接口响应速度`
+        },
+        {
+          id: 'feature_feedback',
+          title: '功能建议自动反馈',
+          description: `用户需求：
+- 功能: 搜索功能增强
+- 建议: 添加语音搜索功能
+- 使用场景: 不方便打字时使用
+
+自动填写的表单：
+问题标题: "建议添加语音搜索功能"
+问题描述: "希望在搜索功能中添加语音搜索选项，方便用户在特定场景下（如开车、手部不便等）进行搜索操作。"
+问题类型: 功能建议
+优先级: 中
+用户场景:
+- 开车时搜索
+- 手部不便时使用
+- 快速搜索场景
+
+预期效果:
+- 提升搜索便利性
+- 改善用户体验
+- 扩大使用场景`,
+          fullContent: `用户需求：
+- 功能: 搜索功能增强
+- 建议: 添加语音搜索功能
+- 使用场景: 不方便打字时使用
+
+自动填写的表单：
+问题标题: "建议添加语音搜索功能"
+问题描述: "希望在搜索功能中添加语音搜索选项，方便用户在特定场景下（如开车、手部不便等）进行搜索操作。"
+问题类型: 功能建议
+优先级: 中
+用户场景:
+- 开车时搜索
+- 手部不便时使用
+- 快速搜索场景
+
+预期效果:
+- 提升搜索便利性
+- 改善用户体验
+- 扩大使用场景`
+        }
+      ]
+    }
+  ],
+  analysisSteps: [
+    { title: '问题识别', description: '自动识别问题类型和特征' },
+    { title: '信息收集', description: '收集相关的问题信息' },
+    { title: '表单生成', description: '自动生成反馈表单内容' },
+    { title: '内容优化', description: '优化表单内容的准确性和完整性' },
+    { title: '提交准备', description: '准备提交反馈表单' }
+  ],
+  capabilities: [
+    {
+      id: 'identification',
+      name: '问题识别',
+      description: '自动识别问题类型和严重程度'
+    },
+    {
+      id: 'generation',
+      name: '内容生成',
+      description: '智能生成反馈表单内容'
+    },
+    {
+      id: 'optimization',
+      name: '内容优化',
+      description: '优化表单内容的准确性和完整性'
+    }
+  ]
+};
+
 // 导出所有配置
 export const agentConfigs = {
   'root-cause-analysis': rootCauseAnalysisConfig,
   'hotfix-agent': hotfixAgentConfig,
   'alert-analysis': alertAnalysisConfig,
-  'first-frame-optimization': firstFrameOptimizationConfig
+  'first-frame-optimization': firstFrameOptimizationConfig,
+  'blank-screen-detection': blankScreenDetectionConfig,
+  'favorite-tag-generation': favoriteTagGenerationConfig,
+  'emoji-recommendation': emojiRecommendationConfig,
+  'auto-feedback-form': autoFeedbackFormConfig
 };

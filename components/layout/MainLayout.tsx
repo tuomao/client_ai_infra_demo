@@ -15,6 +15,7 @@ import {
   HomeOutlined,
   ShopOutlined,
   ApartmentOutlined,
+  MobileOutlined,
 } from '@ant-design/icons';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -48,6 +49,12 @@ const menuItems: MenuItem[] = [
     getItem(<Link href="/agent-bot/alert-analysis">告警分析Agent</Link>, '/agent-bot/alert-analysis'),
   ]),
   getItem(<Link href="/atomic-agents/market">Agent市场</Link>, '/atomic-agents/market', <ShopOutlined />),
+  getItem('ClientAgent', 'client-agent', <MobileOutlined />, [
+    getItem(<Link href="/client-agent/blank-screen-detection">白屏检测</Link>, '/client-agent/blank-screen-detection'),
+    getItem(<Link href="/client-agent/favorite-tag-generation">收藏标签生成</Link>, '/client-agent/favorite-tag-generation'),
+    getItem(<Link href="/client-agent/emoji-recommendation">表情推荐</Link>, '/client-agent/emoji-recommendation'),
+    getItem(<Link href="/client-agent/auto-feedback-form">自动反馈表单填写</Link>, '/client-agent/auto-feedback-form'),
+  ]),
   getItem(<Link href="/tools/mcp-servers">MCP</Link>, '/tools/mcp-servers', <ApiOutlined />),
   getItem('数据', 'data', <DatabaseOutlined />, [
     getItem(<Link href="/data/knowledge">知识库</Link>, '/data/knowledge'),

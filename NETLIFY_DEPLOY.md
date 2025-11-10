@@ -17,30 +17,52 @@ Netlify 部署时遇到依赖安装超时问题，主要原因：
 - 添加 `--prefer-offline` 优先使用缓存
 - 添加 `--legacy-peer-deps` 处理依赖冲突
 - 禁用进度条和详细日志以减少输出
+- **新增**：增加超时时间到 5 分钟（300000 毫秒）
+- **新增**：增加重试次数到 5 次
+- **新增**：限制并发连接数为 1，避免过多并发导致超时
+
+#### `.npmrc`
+- 持久化 npm 配置，包括镜像源、超时时间、重试次数等
+- 确保配置在 Netlify 构建环境中生效
 
 #### `.nvmrc`
 - 指定 Node.js 版本为 `22.21.1`，确保版本一致性
 
 ### 2. 配置说明
 
+#### `netlify.toml`
 ```toml
 [build]
   command = "npm run build"
-  install = "npm ci --no-audit --prefer-offline --legacy-peer-deps"
+  # 优化安装命令：使用国内镜像源，增加超时时间和重试次数，限制并发数避免超时
+  install = "npm config set registry https://registry.npmmirror.com && npm config set fetch-timeout 300000 && npm config set fetch-retries 5 && npm config set maxsockets 1 && npm ci --no-audit --prefer-offline --legacy-peer-deps"
 
 [build.environment]
   NODE_VERSION = "22.21.1"
   NPM_FLAGS = "--no-audit --prefer-offline --legacy-peer-deps"
   NPM_CONFIG_PROGRESS = "false"
   NPM_CONFIG_LOGGER = "error"
+  NPM_CONFIG_FETCH_TIMEOUT = "300000"
+  NPM_CONFIG_FETCH_RETRIES = "5"
+  NPM_CONFIG_MAXSOCKETS = "1"
+```
+
+#### `.npmrc`
+```ini
+registry=https://registry.npmmirror.com
+fetch-timeout=300000
+fetch-retries=5
+maxsockets=1
+progress=false
+loglevel=error
 ```
 
 ### 3. 部署步骤
 
 1. **提交配置文件到仓库**：
    ```bash
-   git add netlify.toml .nvmrc
-   git commit -m "添加 Netlify 构建配置以解决安装超时问题"
+   git add netlify.toml .npmrc .nvmrc
+   git commit -m "优化 Netlify 构建配置以解决依赖安装超时问题"
    git push
    ```
 
@@ -62,6 +84,9 @@ Netlify 部署时遇到依赖安装超时问题，主要原因：
    - `NPM_FLAGS` = `--no-audit --prefer-offline --legacy-peer-deps`
    - `NPM_CONFIG_PROGRESS` = `false`
    - `NPM_CONFIG_LOGGER` = `error`
+   - `NPM_CONFIG_FETCH_TIMEOUT` = `300000`
+   - `NPM_CONFIG_FETCH_RETRIES` = `5`
+   - `NPM_CONFIG_MAXSOCKETS` = `1`
 
 #### 选项 B：检查构建日志
 - 查看 Netlify 构建日志，确认具体是哪个步骤超时
@@ -94,6 +119,10 @@ time npm ci --no-audit --prefer-offline --legacy-peer-deps
 - ✅ 使用 `npm ci` 而不是 `npm install`（更快、可重现）
 - ✅ 跳过审计和详细日志（减少输出时间）
 - ✅ 指定 Node 版本（避免版本不匹配问题）
+- ✅ 使用国内镜像源加速下载（registry.npmmirror.com）
+- ✅ 增加超时时间到 5 分钟，避免网络波动导致超时
+- ✅ 增加重试次数到 5 次，提高安装成功率
+- ✅ 限制并发连接数为 1，避免过多并发导致超时
 
 ## 参考资源
 

@@ -17,6 +17,11 @@ import {
   Tooltip,
   Divider,
   Typography,
+  Drawer,
+  Tabs,
+  Form,
+  Checkbox,
+  message,
 } from 'antd';
 import {
   ApiOutlined,
@@ -33,11 +38,20 @@ import {
   ApartmentOutlined,
   FilterOutlined,
   SortAscendingOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
 import MainLayout from '@/components/layout/MainLayout';
 
 const { Option } = Select;
-const { Title } = Typography;
+const { Title, Text, Paragraph } = Typography;
+
+// 可选的用户信息字段（基本信息userId和userName始终返回）
+const USER_INFO_FIELDS = [
+  { key: 'isNewUser', label: '是否新用户', description: '是否为首次使用的新用户' },
+  { key: 'deviceType', label: '设备类型', description: '用户使用的设备类型（iOS/Android/Web等）' },
+  { key: 'version', label: '版本', description: '应用版本号' },
+  { key: 'isTeenMode', label: '是否青少年模式', description: '是否开启青少年模式' },
+];
 
 // 分类图标映射
 const categoryIcons: Record<string, any> = {
@@ -60,6 +74,12 @@ export default function MCPServersPage() {
   const [detailVisible, setDetailVisible] = useState(false);
   const [selectedServer, setSelectedServer] = useState<any>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [toolDrawerVisible, setToolDrawerVisible] = useState(false);
+  const [selectedTool, setSelectedTool] = useState<string | null>(null);
+  const [userInfoDrawerVisible, setUserInfoDrawerVisible] = useState(false);
+  const [userInfoForm] = Form.useForm();
+  const [userInfoLoading, setUserInfoLoading] = useState(false);
+  const [userInfoResult, setUserInfoResult] = useState<any>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -95,6 +115,62 @@ export default function MCPServersPage() {
     setDetailVisible(true);
   };
 
+  // 处理用户信息子服务点击
+  const handleUserInfoClick = () => {
+    setUserInfoDrawerVisible(true);
+    userInfoForm.resetFields();
+    setUserInfoResult(null);
+  };
+
+  // 调用getUserInfo
+  const handleGetUserInfo = async (values: any) => {
+    setUserInfoLoading(true);
+    try {
+      const { userId, fields } = values;
+      
+      // 构建请求参数
+      const params: any = { userId };
+      
+      // 如果选择了字段，添加到参数中
+      if (fields && fields.length > 0) {
+        params.fields = fields;
+      }
+
+      // 模拟MCP调用
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // 模拟返回数据
+      const mockResult: any = {
+        userId,
+        userName: '测试用户',
+      };
+
+      // 根据选择的字段添加相应数据
+      if (fields) {
+        if (fields.includes('isNewUser')) {
+          mockResult.isNewUser = false;
+        }
+        if (fields.includes('deviceType')) {
+          mockResult.deviceType = 'iOS';
+        }
+        if (fields.includes('version')) {
+          mockResult.version = '10.2.0';
+        }
+        if (fields.includes('isTeenMode')) {
+          mockResult.isTeenMode = false;
+        }
+      }
+
+      setUserInfoResult(mockResult);
+      message.success('获取用户信息成功');
+    } catch (error) {
+      message.error('获取用户信息失败');
+      console.error(error);
+    } finally {
+      setUserInfoLoading(false);
+    }
+  };
+
   // 按分类组织服务器
   const getServersByCategory = () => {
     const result: Record<string, any[]> = {};
@@ -127,6 +203,11 @@ export default function MCPServersPage() {
 
   const serversByCategory = getServersByCategory();
   const totalServers = Object.values(serversByCategory).reduce((sum, servers) => sum + servers.length, 0);
+
+  // 获取APM服务器数据
+  const apmServer = categories
+    .find(cat => cat.id === 'company-platform')
+    ?.servers?.find((s: any) => s.id === 'mcp-apm');
 
   return (
     <MainLayout>
@@ -207,6 +288,100 @@ export default function MCPServersPage() {
             </div>
           </Space>
         </Card>
+
+        {/* APM数据展示 - 在所有分类之前 */}
+        {apmServer && apmServer.subServices && (
+          <>
+            <Card
+              size="small"
+              style={{ marginBottom: 16 }}
+              styles={{ body: { padding: '12px 16px' } }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 8,
+                    background: `${categoryColors['company-platform']}15`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 20,
+                    color: categoryColors['company-platform'],
+                  }}
+                >
+                  <ApiOutlined />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>
+                    APM数据
+                    <Tag style={{ marginLeft: 12 }} color={categoryColors['company-platform']}>
+                      {apmServer.subServices.length} 个数据源
+                    </Tag>
+                  </div>
+                  <div style={{ fontSize: 13, color: '#8c8c8c' }}>
+                    APM监控平台提供的各类数据源
+                  </div>
+                </div>
+              </div>
+            </Card>
+            <Card
+              size="small"
+              style={{ marginBottom: 32 }}
+            >
+              <Row gutter={[12, 12]}>
+                {apmServer.subServices.map((subService: any, index: number) => (
+                  <Col span={6} key={index}>
+                    <Card
+                      size="small"
+                      hoverable
+                      style={{ 
+                        background: '#fafafa',
+                        cursor: subService.name === '用户信息' ? 'pointer' : 'default'
+                      }}
+                      styles={{ body: { padding: 12 } }}
+                      onClick={() => {
+                        if (subService.name === '用户信息') {
+                          handleUserInfoClick();
+                        }
+                      }}
+                    >
+                      <div style={{ marginBottom: 8, fontWeight: 600, fontSize: 13 }}>
+                        {subService.name === '用户信息' && (
+                          <UserOutlined style={{ marginRight: 4, color: '#1890ff' }} />
+                        )}
+                        {subService.name}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: '#8c8c8c',
+                          marginBottom: 8,
+                          minHeight: 32,
+                        }}
+                      >
+                        {subService.description}
+                      </div>
+                      <Space size={4} wrap>
+                        {subService.capabilities.slice(0, 2).map((cap: string) => (
+                          <Tag key={cap} style={{ fontSize: 11 }}>
+                            {cap}
+                          </Tag>
+                        ))}
+                        {subService.capabilities.length > 2 && (
+                          <Tag style={{ fontSize: 11 }}>
+                            +{subService.capabilities.length - 2}
+                          </Tag>
+                        )}
+                      </Space>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </Card>
+          </>
+        )}
 
         {/* 分类展示（不折叠） */}
         {categories.map(category => {
@@ -412,91 +587,6 @@ export default function MCPServersPage() {
                   </Col>
                 ))}
               </Row>
-
-              {/* APM数据展示 */}
-              {category.id === 'company-platform' && categoryServers.some((s: any) => s.id === 'mcp-apm') && (
-                <Card
-                  size="small"
-                  style={{ marginBottom: 32 }}
-                  styles={{ body: { padding: '12px 16px' } }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                    <div
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 8,
-                        background: `${categoryColors[category.id]}15`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 20,
-                        color: categoryColors[category.id],
-                      }}
-                    >
-                      <ApiOutlined />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>
-                        APM数据
-                        <Tag style={{ marginLeft: 12 }} color={categoryColors[category.id]}>
-                          {categoryServers.find((s: any) => s.id === 'mcp-apm')?.subServices?.length || 0} 个数据源
-                        </Tag>
-                      </div>
-                      <div style={{ fontSize: 13, color: '#8c8c8c' }}>
-                        APM监控平台提供的各类数据源
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              )}
-              {category.id === 'company-platform' && categoryServers.some((s: any) => s.id === 'mcp-apm') && (
-                <Card
-                  size="small"
-                  style={{ marginBottom: 32 }}
-                >
-                  <Row gutter={[12, 12]}>
-                    {categoryServers
-                      .find((s: any) => s.id === 'mcp-apm')
-                      ?.subServices.map((subService: any, index: number) => (
-                        <Col span={6} key={index}>
-                          <Card
-                            size="small"
-                            hoverable
-                            style={{ background: '#fafafa' }}
-                            styles={{ body: { padding: 12 } }}
-                          >
-                            <div style={{ marginBottom: 8, fontWeight: 600, fontSize: 13 }}>
-                              {subService.name}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: 12,
-                                color: '#8c8c8c',
-                                marginBottom: 8,
-                                minHeight: 32,
-                              }}
-                            >
-                              {subService.description}
-                            </div>
-                            <Space size={4} wrap>
-                              {subService.capabilities.slice(0, 2).map((cap: string) => (
-                                <Tag key={cap} style={{ fontSize: 11 }}>
-                                  {cap}
-                                </Tag>
-                              ))}
-                              {subService.capabilities.length > 2 && (
-                                <Tag style={{ fontSize: 11 }}>
-                                  +{subService.capabilities.length - 2}
-                                </Tag>
-                              )}
-                            </Space>
-                          </Card>
-                        </Col>
-                      ))}
-                  </Row>
-                </Card>
-              )}
             </div>
           );
         })}
@@ -603,6 +693,194 @@ export default function MCPServersPage() {
           </Space>
         )}
       </Modal>
+
+      {/* 用户信息 getUserInfo 半层弹窗 */}
+      <Drawer
+        title={
+          <Space>
+            <ApiOutlined style={{ color: '#1890ff', fontSize: 20 }} />
+            <span>MCP协议详情 - getUserInfo</span>
+          </Space>
+        }
+        open={userInfoDrawerVisible}
+        onClose={() => {
+          setUserInfoDrawerVisible(false);
+          setUserInfoResult(null);
+        }}
+        width={720}
+        placement="right"
+      >
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          {/* MCP协议信息 */}
+          <div>
+            <Title level={4}>
+              <ApiOutlined style={{ marginRight: 8 }} />
+              MCP协议信息
+            </Title>
+            <Descriptions column={1} bordered size="small">
+              <Descriptions.Item label="工具名称">getUserInfo</Descriptions.Item>
+              <Descriptions.Item label="所属服务器">Yunxiao MCP</Descriptions.Item>
+              <Descriptions.Item label="描述">获取用户信息，支持按需返回字段</Descriptions.Item>
+              <Descriptions.Item label="调用次数">567</Descriptions.Item>
+              <Descriptions.Item label="平均耗时">80ms</Descriptions.Item>
+            </Descriptions>
+          </div>
+
+          <Divider />
+
+          {/* 参数配置 */}
+          <div>
+            <Title level={4}>参数配置</Title>
+            <Form
+              form={userInfoForm}
+              layout="vertical"
+              onFinish={handleGetUserInfo}
+            >
+              <Form.Item
+                name="userId"
+                label="用户ID"
+                rules={[{ required: true, message: '请输入用户ID' }]}
+              >
+                <Input
+                  placeholder="请输入用户ID"
+                  prefix={<UserOutlined />}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="fields"
+                label="返回字段（可选，不选则只返回基本信息）"
+                tooltip="基本信息包含userId和userName，选择其他字段后会在返回结果中包含"
+              >
+                <Checkbox.Group style={{ width: '100%' }}>
+                  <Space direction="vertical" style={{ width: '100%' }}>
+                    {USER_INFO_FIELDS.map(field => (
+                      <Checkbox key={field.key} value={field.key}>
+                        <Space direction="vertical" size={0}>
+                          <Text strong>{field.label}</Text>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            {field.description}
+                          </Text>
+                        </Space>
+                      </Checkbox>
+                    ))}
+                  </Space>
+                </Checkbox.Group>
+              </Form.Item>
+
+              <Form.Item>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={userInfoLoading}
+                  icon={<ApiOutlined />}
+                  block
+                >
+                  调用getUserInfo
+                </Button>
+              </Form.Item>
+            </Form>
+          </div>
+
+          {/* 返回结果 */}
+          {userInfoResult && (
+            <>
+              <Divider />
+              <div>
+                <Title level={4}>
+                  <CheckCircleOutlined style={{ color: '#52c41a', marginRight: 8 }} />
+                  返回结果
+                </Title>
+                <Card>
+                  <pre style={{ 
+                    background: '#f5f5f5', 
+                    padding: '16px', 
+                    borderRadius: '4px',
+                    overflow: 'auto',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word'
+                  }}>
+                    <code>{JSON.stringify(userInfoResult, null, 2)}</code>
+                  </pre>
+                </Card>
+                <div style={{ marginTop: 16 }}>
+                  <Descriptions column={1} bordered size="small">
+                    <Descriptions.Item label="用户ID">{userInfoResult.userId}</Descriptions.Item>
+                    <Descriptions.Item label="用户名">{userInfoResult.userName}</Descriptions.Item>
+                    {userInfoResult.isNewUser !== undefined && (
+                      <Descriptions.Item label="是否新用户">
+                        {userInfoResult.isNewUser ? '是' : '否'}
+                      </Descriptions.Item>
+                    )}
+                    {userInfoResult.deviceType && (
+                      <Descriptions.Item label="设备类型">{userInfoResult.deviceType}</Descriptions.Item>
+                    )}
+                    {userInfoResult.version && (
+                      <Descriptions.Item label="版本">{userInfoResult.version}</Descriptions.Item>
+                    )}
+                    {userInfoResult.isTeenMode !== undefined && (
+                      <Descriptions.Item label="是否青少年模式">
+                        {userInfoResult.isTeenMode ? '是' : '否'}
+                      </Descriptions.Item>
+                    )}
+                  </Descriptions>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* MCP协议说明 */}
+          <Divider />
+          <div>
+            <Title level={4}>协议说明</Title>
+            <Paragraph>
+              <Text strong>getUserInfo</Text> 是一个MCP工具，用于获取用户信息。
+            </Paragraph>
+            <Paragraph>
+              <Text strong>基本信息：</Text> 始终返回 userId 和 userName，只需要传入 userId 参数。
+            </Paragraph>
+            <Paragraph>
+              <Text strong>扩展字段：</Text> 通过 fields 参数指定需要返回的字段，支持以下字段：
+              <ul>
+                {USER_INFO_FIELDS.map(field => (
+                  <li key={field.key}>
+                    <Text code>{field.key}</Text>: {field.description}
+                  </li>
+                ))}
+              </ul>
+            </Paragraph>
+            <Paragraph>
+              <Text strong>调用示例：</Text>
+              <pre style={{ 
+                background: '#f5f5f5', 
+                padding: '16px', 
+                borderRadius: '4px',
+                overflow: 'auto',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                marginTop: '8px'
+              }}>
+                <code>{`// 只获取基本信息
+getUserInfo({ userId: "123456" })
+// 返回: { userId: "123456", userName: "用户名" }
+
+// 获取扩展字段
+getUserInfo({ 
+  userId: "123456",
+  fields: ["isNewUser", "deviceType", "version"]
+})
+// 返回: { 
+//   userId: "123456", 
+//   userName: "用户名",
+//   isNewUser: false,
+//   deviceType: "iOS",
+//   version: "10.2.0"
+// }`}</code>
+              </pre>
+            </Paragraph>
+          </div>
+        </Space>
+      </Drawer>
     </MainLayout>
   );
 }
