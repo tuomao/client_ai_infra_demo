@@ -193,13 +193,13 @@ export default function HomePage() {
                       </Space>
                     </Col>
                     
-                    <Col span={6} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingLeft: 4, paddingRight: 4 }}>
+                    <Col span={6} style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingLeft: 4, paddingRight: 4 }}>
                   <Button
                     type="primary"
                     size="large"
                     loading={false}
                     disabled={false}
-                    style={{ height: 40, width: '50%' }}
+                    style={{ height: 40, whiteSpace: 'nowrap', paddingLeft: 24, paddingRight: 24 }}
                     onClick={() => {
                       if (todo.type === 'experiment_solidify') {
                         message.success('实验固化Agent已启动！');

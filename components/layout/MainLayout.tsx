@@ -41,6 +41,7 @@ function getItem(
 }
 
 const menuItems: MenuItem[] = [
+  getItem(<Link href="/architecture">架构</Link>, '/architecture', <ApartmentOutlined />),
   getItem(<Link href="/">我的工作台</Link>, '/', <HomeOutlined />),
   getItem('我的AgentBot', 'agent-bot', <RobotOutlined />, [
     getItem(<Link href="/agent-bot/feedback-analysis">根因分析</Link>, '/agent-bot/feedback-analysis'),
@@ -62,7 +63,6 @@ const menuItems: MenuItem[] = [
     getItem(<Link href="/data/app-data">应用数据</Link>, '/data/app-data'),
     getItem(<Link href="/admin/test-suite">测评集管理</Link>, '/admin/test-suite'),
   ]),
-  getItem(<Link href="/architecture">架构</Link>, '/architecture', <ApartmentOutlined />),
 ];
 
 interface MainLayoutProps {

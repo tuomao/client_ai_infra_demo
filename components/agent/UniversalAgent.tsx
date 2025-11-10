@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Space, Input, Select, Tag, Steps, Alert, Progress, Divider, Row, Col, Statistic, Badge, Popover, List, App } from 'antd';
+import { Card, Button, Space, Input, Select, Tag, Steps, Alert, Progress, Divider, Row, Col, Statistic, Badge, Popover, List, App, message } from 'antd';
 import {
   AimOutlined,
   LoadingOutlined,
@@ -54,7 +54,6 @@ interface UniversalAgentProps {
 }
 
 export default function UniversalAgent({ config }: UniversalAgentProps) {
-  const { message } = App.useApp();
   const [viewMode, setViewMode] = useState<'initial' | 'analysis'>('initial');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
