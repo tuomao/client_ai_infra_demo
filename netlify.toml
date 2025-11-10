@@ -2,8 +2,8 @@
   command = "pnpm run build"
   # 使用 pnpm 安装依赖：更快、更节省空间
   install = "npm install -g pnpm@latest && pnpm install --frozen-lockfile --prefer-offline"
-  # 发布目录：Next.js 静态导出后的输出目录
-  publish = "out"
+  # 注意：使用 @netlify/plugin-nextjs 时不需要设置 publish 目录
+  # 插件会自动处理 Next.js 构建输出
 
 [build.environment]
   NODE_VERSION = "22.21.1"
