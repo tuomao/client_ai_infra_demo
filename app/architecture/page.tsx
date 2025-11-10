@@ -33,8 +33,38 @@ export default function ArchitecturePage() {
           </Space>
         </Card>
 
+        {/* 平台能力 */}
+        <Card 
+          style={{ marginBottom: 32 }}
+          bodyStyle={{ padding: '8px 24px' }}
+        >
+          <Title level={2} style={{ marginBottom: 0, textAlign: 'center', marginTop: 0 }}>
+            平台能力
+          </Title>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center',
+            padding: '0',
+            marginTop: '0'
+          }}>
+            <Image
+              src="/agent_service.png"
+              alt="平台能力"
+              width={1200}
+              height={675}
+              style={{
+                width: '100%',
+                height: 'auto',
+                maxWidth: '1200px',
+              }}
+              priority
+            />
+          </div>
+        </Card>
+
         {/* 架构图 */}
-        <Card>
+        <Card style={{ marginBottom: 32 }}>
           <Title level={2} style={{ marginBottom: 32, textAlign: 'center' }}>
             系统架构图
           </Title>
@@ -53,6 +83,36 @@ export default function ArchitecturePage() {
               <Image
                 src="/architecture.png"
                 alt="系统架构图"
+                fill
+                style={{
+                  objectFit: 'contain',
+                }}
+                priority
+              />
+            </div>
+          </div>
+        </Card>
+
+        {/* 落地场景-AI排障 */}
+        <Card>
+          <Title level={2} style={{ marginBottom: 32, textAlign: 'center' }}>
+            落地场景-AI排障
+          </Title>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center',
+            padding: '24px 0'
+          }}>
+            <div style={{
+              position: 'relative',
+              width: '100%',
+              maxWidth: '1200px',
+              aspectRatio: '16/9',
+            }}>
+              <Image
+                src="/ai_root_cause.png"
+                alt="落地场景-AI排障"
                 fill
                 style={{
                   objectFit: 'contain',
