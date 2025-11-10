@@ -33,18 +33,28 @@ Netlify 部署时遇到依赖安装超时问题，主要原因：
 #### `netlify.toml`
 ```toml
 [build]
-  command = "npm run build"
-  # 优化安装命令：使用国内镜像源，增加超时时间和重试次数，限制并发数避免超时
-  install = "npm config set registry https://registry.npmmirror.com && npm config set fetch-timeout 300000 && npm config set fetch-retries 5 && npm config set maxsockets 1 && npm ci --no-audit --prefer-offline --legacy-peer-deps"
+  command = "pnpm run build"
+  # 使用 pnpm 安装依赖：更快、更节省空间
+  install = "npm install -g pnpm@latest && pnpm install --frozen-lockfile --prefer-offline"
+  # 发布目录：Next.js 静态导出后的输出目录
+  publish = "out"
 
 [build.environment]
   NODE_VERSION = "22.21.1"
-  NPM_FLAGS = "--no-audit --prefer-offline --legacy-peer-deps"
+  # pnpm 配置
+  PNPM_FLAGS = "--frozen-lockfile --prefer-offline"
+  # 禁用进度条和详细日志，减少输出时间
   NPM_CONFIG_PROGRESS = "false"
   NPM_CONFIG_LOGGER = "error"
+  # 增加超时时间到 5 分钟（300000 毫秒）
   NPM_CONFIG_FETCH_TIMEOUT = "300000"
+  # 增加重试次数到 5 次
   NPM_CONFIG_FETCH_RETRIES = "5"
-  NPM_CONFIG_MAXSOCKETS = "1"
+  # pnpm 网络并发数
+  PNPM_NETWORK_CONCURRENCY = "5"
+  # Next.js 配置：Netlify 部署时不需要 basePath（除非是子目录部署）
+  # 如果需要部署到子目录，设置为对应的路径，例如：NEXT_PUBLIC_BASE_PATH = "/your-subdirectory"
+  NEXT_PUBLIC_BASE_PATH = ""
 ```
 
 #### `.npmrc`
@@ -68,9 +78,11 @@ loglevel=error
 
 2. **在 Netlify 控制台验证配置**：
    - 进入 Netlify 控制台 > Site settings > Build & deploy
-   - 确认构建命令为：`npm run build`
-   - 确认安装命令为：`npm ci --no-audit --prefer-offline --legacy-peer-deps`
+   - 确认构建命令为：`pnpm run build`
+   - 确认发布目录为：`out`
+   - 确认安装命令为：`npm install -g pnpm@latest && pnpm install --frozen-lockfile --prefer-offline`
    - 确认 Node 版本为：`22.21.1`
+   - 确认环境变量 `NEXT_PUBLIC_BASE_PATH` 为空（或根据需求设置）
 
 3. **触发新的部署**：
    - 推送到 main 分支会自动触发部署

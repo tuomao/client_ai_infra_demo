@@ -2,6 +2,8 @@
   command = "pnpm run build"
   # 使用 pnpm 安装依赖：更快、更节省空间
   install = "npm install -g pnpm@latest && pnpm install --frozen-lockfile --prefer-offline"
+  # 发布目录：Next.js 静态导出后的输出目录
+  publish = "out"
 
 [build.environment]
   NODE_VERSION = "22.21.1"
@@ -16,4 +18,7 @@
   NPM_CONFIG_FETCH_RETRIES = "5"
   # pnpm 网络并发数
   PNPM_NETWORK_CONCURRENCY = "5"
+  # Next.js 配置：Netlify 部署时不需要 basePath（除非是子目录部署）
+  # 如果需要部署到子目录，设置为对应的路径，例如：NEXT_PUBLIC_BASE_PATH = "/your-subdirectory"
+  NEXT_PUBLIC_BASE_PATH = ""
 
