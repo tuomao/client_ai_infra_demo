@@ -1,10 +1,19 @@
 [build]
   command = "npm run build"
-  install = "npm ci --no-audit --prefer-offline --legacy-peer-deps"
+  # 优化安装命令：使用国内镜像源，增加超时时间和重试次数，限制并发数避免超时
+  install = "npm config set registry https://registry.npmmirror.com && npm config set fetch-timeout 300000 && npm config set fetch-retries 5 && npm config set maxsockets 1 && npm ci --no-audit --prefer-offline --legacy-peer-deps"
 
 [build.environment]
   NODE_VERSION = "22.21.1"
+  # npm 安装优化标志
   NPM_FLAGS = "--no-audit --prefer-offline --legacy-peer-deps"
+  # 禁用进度条和详细日志，减少输出时间
   NPM_CONFIG_PROGRESS = "false"
   NPM_CONFIG_LOGGER = "error"
+  # 增加超时时间到 5 分钟（300000 毫秒）
+  NPM_CONFIG_FETCH_TIMEOUT = "300000"
+  # 增加重试次数到 5 次
+  NPM_CONFIG_FETCH_RETRIES = "5"
+  # 限制并发连接数，避免过多并发导致超时
+  NPM_CONFIG_MAXSOCKETS = "1"
 
