@@ -50,7 +50,7 @@ const menuItems: MenuItem[] = [
     getItem(<Link href="/agent-bot/alert-analysis">告警分析Agent</Link>, '/agent-bot/alert-analysis'),
   ]),
   getItem(<Link href="/atomic-agents/market">Agent市场</Link>, '/atomic-agents/market', <ShopOutlined />),
-  getItem('ClientAgent', 'client-agent', <MobileOutlined />, [
+  getItem('端Agent', 'client-agent', <MobileOutlined />, [
     getItem(<Link href="/client-agent/blank-screen-detection">白屏检测</Link>, '/client-agent/blank-screen-detection'),
     getItem(<Link href="/client-agent/favorite-tag-generation">收藏标签生成</Link>, '/client-agent/favorite-tag-generation'),
     getItem(<Link href="/client-agent/emoji-recommendation">表情推荐</Link>, '/client-agent/emoji-recommendation'),
