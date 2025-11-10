@@ -42,7 +42,7 @@ function getItem(
 
 const menuItems: MenuItem[] = [
   getItem(<Link href="/architecture">架构</Link>, '/architecture', <ApartmentOutlined />),
-  getItem(<Link href="/">我的工作台</Link>, '/', <HomeOutlined />),
+  getItem(<Link href="/workspace">我的工作台</Link>, '/workspace', <HomeOutlined />),
   getItem('我的AgentBot', 'agent-bot', <RobotOutlined />, [
     getItem(<Link href="/agent-bot/feedback-analysis">根因分析</Link>, '/agent-bot/feedback-analysis'),
     getItem(<Link href="/agent-bot/first-frame-optimization">首帧优化</Link>, '/agent-bot/first-frame-optimization'),
