@@ -373,6 +373,19 @@
       "tags": ["UI自动化", "测试", "操作模拟"],
       "atomicAgents": ["atomic-004"],
       "thumbnail": "/images/ui-automation-agent.png"
+    },
+    {
+      "id": "market-008",
+      "name": "Pingcode Agent",
+      "author": "AI Work Studio",
+      "category": "质量",
+      "description": "负责PingCode的创建、排期更新、状态更新，实现项目管理自动化",
+      "rating": 4.8,
+      "downloads": 2890,
+      "price": "免费",
+      "tags": ["PingCode", "项目管理", "自动化", "排期管理"],
+      "atomicAgents": ["atomic-004"],
+      "thumbnail": "/images/pingcode-agent.png"
     }
   ]
 }

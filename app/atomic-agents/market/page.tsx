@@ -28,6 +28,7 @@ import {
   FileSearchOutlined,
   ApiOutlined,
   BellOutlined,
+  CheckCircleOutlined,
 } from '@ant-design/icons';
 import MainLayout from '@/components/layout/MainLayout';
 
@@ -50,6 +51,7 @@ const getAgentIcon = (agentName: string) => {
     '代码搜索Agent': <SearchOutlined />,
     '代码读取Agent': <CodeOutlined />,
     '告警分析Agent': <BellOutlined />,
+    'Pingcode Agent': <CheckCircleOutlined />,
   };
   
   return iconMap[agentName] || <RobotOutlined />;
