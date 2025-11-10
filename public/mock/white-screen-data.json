@@ -1,0 +1,359 @@
+{
+  "issues": [
+    {
+      "id": "ws-001",
+      "title": "首页白屏问题 - Cannot read property 'map' of undefined",
+      "timestamp": "2025-11-06T10:30:00Z",
+      "affectedUsers": 1256,
+      "version": "3.2.1",
+      "status": "analyzing",
+      "severity": "critical",
+      "errorStack": "TypeError: Cannot read property 'map' of undefined\n    at HomePage.render (HomePage.tsx:45:28)\n    at ReactDOMComponent.render (react-dom.js:3452)\n    at mountComponent (react-dom.js:2234)\n    at Object.mountComponent (react-dom.js:1245)\n    at ReactReconciler.mountComponent (ReactReconciler.js:43)",
+      "environment": {
+        "device": "iPhone 14 Pro",
+        "os": "iOS",
+        "osVersion": "17.1.1",
+        "browser": "Safari",
+        "browserVersion": "17.1",
+        "network": "4G",
+        "appVersion": "3.2.1"
+      },
+      "aiAnalysis": {
+        "rootCause": "组件渲染时未对数据进行空值检查，导致在数据未加载完成时尝试调用 map 方法",
+        "relatedCode": [
+          {
+            "file": "src/pages/HomePage.tsx",
+            "line": 45,
+            "code": "const renderItems = () => {\n  return items.map((item) => <ItemCard key={item.id} item={item} />);\n};",
+            "language": "typescript"
+          }
+        ],
+        "possibleReasons": [
+          "API请求失败或超时，导致items数据为undefined",
+          "组件初始化时未设置items的默认值",
+          "状态管理中的数据流异常",
+          "网络波动导致数据加载失败"
+        ],
+        "solution": "建议添加空值检查和loading状态处理：\n\nconst renderItems = () => {\n  if (!items || items.length === 0) {\n    return <Empty description=\"暂无数据\" />;\n  }\n  return items.map((item) => <ItemCard key={item.id} item={item} />);\n};",
+        "confidence": 0.95,
+        "thinkingChain": [
+          {
+            "step": 1,
+            "type": "error-stack-analysis",
+            "title": "错误堆栈分析",
+            "description": "通过错误堆栈追踪问题源头",
+            "reasoning": "从错误信息 'Cannot read property map of undefined' 可以判断，items 变量在调用 map 方法时为 undefined",
+            "evidence": {
+              "errorLine": "HomePage.tsx:45:28",
+              "errorMethod": "items.map",
+              "callStack": ["HomePage.render", "ReactDOMComponent.render", "mountComponent"]
+            },
+            "conclusion": "问题定位在 HomePage.tsx 第45行的 map 调用",
+            "confidence": 0.98,
+            "charts": {
+              "type": "stack-trace",
+              "data": {
+                "depth": 5,
+                "errorAt": 0,
+                "totalCalls": 5
+              }
+            }
+          },
+          {
+            "step": 2,
+            "type": "data-flow-analysis",
+            "title": "数据流分析",
+            "description": "分析items变量的数据流向和赋值逻辑",
+            "reasoning": "追踪items变量的来源，发现它来自useState钩子，初始值应该是从API获取，但可能在API响应之前就尝试渲染",
+            "evidence": {
+              "variableName": "items",
+              "initialValue": "undefined",
+              "expectedSource": "API: /api/items",
+              "actualValue": "undefined at render time"
+            },
+            "conclusion": "items在组件首次渲染时为undefined，未设置默认值",
+            "confidence": 0.95,
+            "charts": {
+              "type": "data-flow",
+              "data": {
+                "source": "API",
+                "intermediate": "useState",
+                "destination": "renderItems",
+                "breakPoint": "useState initialization"
+              }
+            }
+          },
+          {
+            "step": 3,
+            "type": "api-check",
+            "title": "API调用检查",
+            "description": "检查API请求的状态和返回数据",
+            "reasoning": "从Trace数据看，API请求返回了200状态码，响应时间1200ms，数据大小15KB，说明API本身是成功的",
+            "evidence": {
+              "apiUrl": "/api/items",
+              "status": 200,
+              "duration": 1200,
+              "responseSize": 15234,
+              "timing": "在组件渲染700ms后才完成"
+            },
+            "conclusion": "API调用成功但响应较慢，组件在API返回前就开始渲染",
+            "confidence": 0.92,
+            "charts": {
+              "type": "timeline",
+              "data": {
+                "events": [
+                  {"time": 0, "event": "页面开始加载"},
+                  {"time": 500, "event": "发起API请求"},
+                  {"time": 1300, "event": "组件开始渲染"},
+                  {"time": 1700, "event": "API响应完成"},
+                  {"time": 1350, "event": "❌ 错误发生"}
+                ]
+              }
+            }
+          },
+          {
+            "step": 4,
+            "type": "similar-issues",
+            "title": "历史问题关联分析",
+            "description": "搜索知识库中的相似问题",
+            "reasoning": "在知识库中搜索'map of undefined'关键词，找到3个相似案例，都是因为缺少空值检查导致",
+            "evidence": {
+              "similarCount": 3,
+              "issueIds": ["ws-015", "ws-032", "ws-048"],
+              "commonPattern": "未进行空值检查",
+              "successRate": "100% (3/3) 通过添加空值检查解决"
+            },
+            "conclusion": "这是一个常见模式问题，有成熟的解决方案",
+            "confidence": 0.97,
+            "charts": {
+              "type": "similarity",
+              "data": {
+                "matches": [
+                  {"id": "ws-015", "similarity": 0.95, "status": "resolved"},
+                  {"id": "ws-032", "similarity": 0.89, "status": "resolved"},
+                  {"id": "ws-048", "similarity": 0.87, "status": "resolved"}
+                ]
+              }
+            }
+          },
+          {
+            "step": 5,
+            "type": "env-analysis",
+            "title": "环境因素分析",
+            "description": "分析设备、网络等环境因素的影响",
+            "reasoning": "问题发生在4G网络环境下，网络延迟可能导致API响应变慢，从而触发竞态条件",
+            "evidence": {
+              "network": "4G",
+              "device": "iPhone 14 Pro",
+              "os": "iOS 17.1.1",
+              "affectedUsers": 1256,
+              "pattern": "主要发生在移动网络环境"
+            },
+            "conclusion": "移动网络延迟是触发因素之一，但根本原因是代码缺少防御",
+            "confidence": 0.85,
+            "charts": {
+              "type": "distribution",
+              "data": {
+                "by_network": {"4G": 65, "WiFi": 25, "5G": 10},
+                "by_device": {"iPhone": 70, "Android": 30}
+              }
+            }
+          },
+          {
+            "step": 6,
+            "type": "root-cause",
+            "title": "根本原因确定",
+            "description": "综合所有分析，确定问题的根本原因",
+            "reasoning": "综合以上5个步骤的分析：1.错误位置明确 2.数据流异常 3.API时序问题 4.有历史参考 5.环境因素，可以确定根本原因是缺少空值检查导致的竞态条件",
+            "evidence": {
+              "primary": "代码缺少空值检查",
+              "secondary": "组件渲染和API响应存在时序竞争",
+              "trigger": "网络延迟导致API响应变慢"
+            },
+            "conclusion": "组件渲染时未对数据进行空值检查，导致在数据未加载完成时尝试调用 map 方法",
+            "confidence": 0.95,
+            "charts": {
+              "type": "cause-tree",
+              "data": {
+                "root": "白屏错误",
+                "causes": [
+                  {"level": 1, "cause": "map方法调用失败", "weight": 1.0},
+                  {"level": 2, "cause": "items为undefined", "weight": 0.95},
+                  {"level": 3, "cause": "缺少空值检查", "weight": 0.9},
+                  {"level": 3, "cause": "API响应延迟", "weight": 0.6}
+                ]
+              }
+            }
+          },
+          {
+            "step": 7,
+            "type": "solution-generation",
+            "title": "修复方案生成",
+            "description": "基于根本原因生成具体的修复方案",
+            "reasoning": "参考历史解决方案和最佳实践，生成包含空值检查、loading状态和错误处理的完整修复代码",
+            "evidence": {
+              "bestPractice": "防御性编程",
+              "reference": "React官方文档 - 条件渲染",
+              "testCoverage": "建议添加边界测试用例"
+            },
+            "conclusion": "添加空值检查和loading状态处理是最优解决方案",
+            "confidence": 0.98
+          }
+        ],
+        "analysisSteps": [
+          {
+            "step": 1,
+            "title": "错误堆栈分析",
+            "description": "解析错误堆栈，定位问题代码位置",
+            "result": "错误发生在 HomePage.tsx 第45行，map方法调用处",
+            "timestamp": "2025-11-06T10:30:05Z"
+          },
+          {
+            "step": 2,
+            "title": "代码上下文分析",
+            "description": "分析相关代码逻辑和数据流",
+            "result": "发现items变量未进行空值检查",
+            "timestamp": "2025-11-06T10:30:08Z"
+          },
+          {
+            "step": 3,
+            "title": "历史问题关联",
+            "description": "搜索相似问题和解决方案",
+            "result": "找到3个相似问题，均通过添加空值检查解决",
+            "timestamp": "2025-11-06T10:30:12Z"
+          },
+          {
+            "step": 4,
+            "title": "生成修复方案",
+            "description": "基于分析结果生成代码修复建议",
+            "result": "生成包含空值检查的修复代码",
+            "timestamp": "2025-11-06T10:30:15Z"
+          }
+        ]
+      },
+      "trace": [
+        {
+          "id": "trace-1",
+          "name": "页面加载",
+          "timestamp": 1699261800000,
+          "duration": 2500,
+          "type": "navigation",
+          "children": [
+            {
+              "id": "trace-2",
+              "name": "API请求 - /api/items",
+              "timestamp": 1699261800500,
+              "duration": 1200,
+              "type": "api",
+              "metadata": {
+                "status": 200,
+                "size": 15234
+              }
+            },
+            {
+              "id": "trace-3",
+              "name": "组件渲染 - HomePage",
+              "timestamp": 1699261801800,
+              "duration": 700,
+              "type": "render",
+              "children": [
+                {
+                  "id": "trace-4",
+                  "name": "renderItems 错误",
+                  "timestamp": 1699261802400,
+                  "duration": 50,
+                  "type": "custom",
+                  "metadata": {
+                    "error": "Cannot read property 'map' of undefined"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "similarIssues": ["ws-015", "ws-032", "ws-048"]
+    },
+    {
+      "id": "ws-002",
+      "title": "商品详情页白屏 - Network request failed",
+      "timestamp": "2025-11-06T09:15:00Z",
+      "affectedUsers": 856,
+      "version": "3.2.0",
+      "status": "pending",
+      "severity": "high",
+      "errorStack": "Error: Network request failed\n    at fetchProductDetail (api.ts:123)\n    at ProductDetailPage.componentDidMount (ProductDetailPage.tsx:28)",
+      "environment": {
+        "device": "Xiaomi 13",
+        "os": "Android",
+        "osVersion": "13.0",
+        "browser": "Chrome",
+        "browserVersion": "118.0",
+        "network": "WiFi",
+        "appVersion": "3.2.0"
+      },
+      "similarIssues": []
+    },
+    {
+      "id": "ws-003",
+      "title": "购物车页面白屏 - Maximum call stack size exceeded",
+      "timestamp": "2025-11-06T08:45:00Z",
+      "affectedUsers": 423,
+      "version": "3.2.1",
+      "status": "resolved",
+      "severity": "medium",
+      "errorStack": "RangeError: Maximum call stack size exceeded\n    at CartPage.calculateTotal (CartPage.tsx:67)\n    at CartPage.render (CartPage.tsx:89)",
+      "environment": {
+        "device": "Samsung Galaxy S23",
+        "os": "Android",
+        "osVersion": "14.0",
+        "browser": "Chrome",
+        "browserVersion": "119.0",
+        "network": "5G",
+        "appVersion": "3.2.1"
+      },
+      "similarIssues": ["ws-012"]
+    },
+    {
+      "id": "ws-004",
+      "title": "用户中心白屏 - undefined is not an object",
+      "timestamp": "2025-11-05T22:30:00Z",
+      "affectedUsers": 234,
+      "version": "3.1.8",
+      "status": "pending",
+      "severity": "medium",
+      "errorStack": "TypeError: undefined is not an object (evaluating 'user.profile.avatar')\n    at UserCenterPage.render (UserCenterPage.tsx:34)",
+      "environment": {
+        "device": "iPhone 13",
+        "os": "iOS",
+        "osVersion": "16.5",
+        "browser": "Safari",
+        "browserVersion": "16.5",
+        "network": "WiFi",
+        "appVersion": "3.1.8"
+      },
+      "similarIssues": []
+    },
+    {
+      "id": "ws-005",
+      "title": "搜索结果页白屏 - Failed to fetch",
+      "timestamp": "2025-11-05T20:10:00Z",
+      "affectedUsers": 156,
+      "version": "3.2.1",
+      "status": "ignored",
+      "severity": "low",
+      "errorStack": "TypeError: Failed to fetch\n    at SearchPage.loadResults (SearchPage.tsx:56)",
+      "environment": {
+        "device": "Huawei P50",
+        "os": "Android",
+        "osVersion": "12.0",
+        "browser": "Chrome",
+        "browserVersion": "117.0",
+        "network": "3G",
+        "appVersion": "3.2.1"
+      },
+      "similarIssues": ["ws-002"]
+    }
+  ]
+}
+

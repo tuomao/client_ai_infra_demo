@@ -1,0 +1,224 @@
+{
+  "categories": [
+    {
+      "id": "coding",
+      "name": "编码工具",
+      "icon": "code",
+      "description": "代码相关的MCP服务",
+      "servers": [
+        {
+          "id": "mcp-filesystem",
+          "name": "文件系统",
+          "description": "提供文件读写、目录遍历等文件系统操作能力",
+          "icon": "📁",
+          "status": "active",
+          "version": "v1.2.0",
+          "provider": "官方",
+          "usage": 15234,
+          "favorites": 892,
+          "capabilities": ["ReadFile", "WriteFile", "ListDir", "DeleteFile", "CreateDir"],
+          "tags": ["文件操作", "基础能力"],
+          "documentation": "https://docs.example.com/filesystem"
+        },
+        {
+          "id": "mcp-codebase",
+          "name": "代码库操作",
+          "description": "提供代码搜索、语法分析、代码导航等能力",
+          "icon": "💻",
+          "status": "active",
+          "version": "v2.1.0",
+          "provider": "官方",
+          "usage": 12456,
+          "favorites": 743,
+          "capabilities": ["SearchCode", "ParseAST", "GetReferences", "FindDefinition"],
+          "tags": ["代码分析", "语法解析"],
+          "documentation": "https://docs.example.com/codebase"
+        },
+        {
+          "id": "mcp-git",
+          "name": "Git版本控制",
+          "description": "提供Git仓库操作、分支管理、提交历史查询等能力",
+          "icon": "🔀",
+          "status": "active",
+          "version": "v1.5.3",
+          "provider": "官方",
+          "usage": 9876,
+          "favorites": 654,
+          "capabilities": ["GitLog", "GitDiff", "GitBlame", "CreateBranch", "GitCommit"],
+          "tags": ["版本控制", "协作"],
+          "documentation": "https://docs.example.com/git"
+        },
+        {
+          "id": "mcp-terminal",
+          "name": "终端执行",
+          "description": "提供命令行执行、脚本运行等能力",
+          "icon": "⌨️",
+          "status": "active",
+          "version": "v1.0.8",
+          "provider": "官方",
+          "usage": 8234,
+          "favorites": 521,
+          "capabilities": ["ExecuteCommand", "RunScript", "GetOutput"],
+          "tags": ["命令行", "执行"],
+          "documentation": "https://docs.example.com/terminal"
+        },
+        {
+          "id": "mcp-edit-file",
+          "name": "文件编辑",
+          "description": "提供智能文件编辑、代码格式化、重构等能力",
+          "icon": "✏️",
+          "status": "active",
+          "version": "v1.3.2",
+          "provider": "社区",
+          "usage": 6789,
+          "favorites": 412,
+          "capabilities": ["EditFile", "FormatCode", "RefactorCode", "SearchReplace"],
+          "tags": ["编辑", "重构"],
+          "documentation": "https://docs.example.com/edit"
+        }
+      ]
+    },
+    {
+      "id": "company-platform",
+      "name": "公司内部平台",
+      "icon": "apartment",
+      "description": "公司内部各个平台的MCP服务集成",
+      "servers": [
+        {
+          "id": "mcp-apm",
+          "name": "APM监控平台",
+          "description": "集成APM监控数据，包含日志、埋点、性能指标、Trace等",
+          "icon": "📊",
+          "status": "active",
+          "version": "v3.2.0",
+          "provider": "内部",
+          "usage": 23456,
+          "favorites": 1567,
+          "capabilities": ["GetLogs", "GetTrace", "GetMetrics", "GetBuryPoint", "GetUserInfo", "GetAppInfo", "GetDeviceInfo"],
+          "subServices": [
+            {
+              "name": "日志查询",
+              "description": "查询应用日志、错误日志",
+              "capabilities": ["QueryLogs", "FilterLogs", "ExportLogs"]
+            },
+            {
+              "name": "埋点数据",
+              "description": "查询用户行为埋点数据",
+              "capabilities": ["GetBuryPoint", "GetUserBehavior"]
+            },
+            {
+              "name": "UBT埋点",
+              "description": "用户行为追踪埋点查询",
+              "capabilities": ["GetUBT", "GetUserPath"]
+            },
+            {
+              "name": "Xray链路",
+              "description": "分布式链路追踪",
+              "capabilities": ["GetTrace", "GetSpan"]
+            },
+            {
+              "name": "用户信息",
+              "description": "获取用户基本信息和属性",
+              "capabilities": ["GetUserInfo", "GetUserProfile"]
+            },
+            {
+              "name": "App信息",
+              "description": "获取应用版本、配置信息",
+              "capabilities": ["GetAppInfo", "GetAppVersion"]
+            },
+            {
+              "name": "Trace链路",
+              "description": "APM链路追踪数据",
+              "capabilities": ["GetAPMTrace", "GetPerformance"]
+            },
+            {
+              "name": "稳定性",
+              "description": "应用稳定性指标",
+              "capabilities": ["GetStability", "GetCrashRate"]
+            },
+            {
+              "name": "OOM分析",
+              "description": "内存溢出问题分析",
+              "capabilities": ["GetOOM", "AnalyzeMemory"]
+            },
+            {
+              "name": "性能指标",
+              "description": "应用性能相关指标",
+              "capabilities": ["GetPerformance", "GetFPS"]
+            },
+            {
+              "name": "设备信息",
+              "description": "用户设备信息查询",
+              "capabilities": ["GetDeviceInfo", "GetDeviceModel"]
+            }
+          ],
+          "tags": ["监控", "日志", "性能"],
+          "documentation": "https://apm.internal.com/docs"
+        },
+        {
+          "id": "mcp-dor",
+          "name": "Dor数据库查询",
+          "description": "公司内部数据库查询平台，提供数据查询、统计分析能力",
+          "icon": "🗄️",
+          "status": "active",
+          "version": "v2.1.3",
+          "provider": "内部",
+          "usage": 11234,
+          "favorites": 678,
+          "capabilities": ["QueryData", "ExecuteSQL", "GetTableSchema", "ExportData"],
+          "tags": ["数据库", "查询"],
+          "documentation": "https://dor.internal.com/docs"
+        },
+        {
+          "id": "mcp-switch",
+          "name": "Switch功能开关",
+          "description": "功能开关管理平台，支持开关查询和配置",
+          "icon": "🎚️",
+          "status": "active",
+          "version": "v1.8.2",
+          "provider": "内部",
+          "usage": 9876,
+          "favorites": 543,
+          "capabilities": ["GetSwitch", "SetSwitch", "GetSwitchHistory", "BatchUpdate"],
+          "tags": ["开关", "配置"],
+          "documentation": "https://switch.internal.com/docs"
+        },
+        {
+          "id": "mcp-experiment",
+          "name": "实验平台",
+          "description": "A/B测试实验平台，支持实验配置、数据查询",
+          "icon": "🧪",
+          "status": "active",
+          "version": "v2.3.0",
+          "provider": "内部",
+          "usage": 8765,
+          "favorites": 456,
+          "capabilities": ["GetExperiment", "GetExperimentData", "CreateExperiment", "GetVariants"],
+          "tags": ["实验", "A/B测试"],
+          "documentation": "https://experiment.internal.com/docs"
+        },
+        {
+          "id": "mcp-pingcode",
+          "name": "PingCode项目管理",
+          "description": "项目管理和任务追踪平台",
+          "icon": "📋",
+          "status": "active",
+          "version": "v1.4.2",
+          "provider": "内部",
+          "usage": 10234,
+          "favorites": 612,
+          "capabilities": ["GetTasks", "CreateTask", "UpdateTask", "GetProject"],
+          "tags": ["项目管理", "任务"],
+          "documentation": "https://pingcode.internal.com/docs"
+        }
+      ]
+    }
+  ],
+  "statistics": {
+    "totalServers": 10,
+    "activeServers": 10,
+    "totalUsage": 117125,
+    "totalFavorites": 7815
+  }
+}
+

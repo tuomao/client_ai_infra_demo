@@ -1,0 +1,38 @@
+{
+  "items": [
+    {
+      "id": "kb-001",
+      "title": "React组件空值检查最佳实践",
+      "content": "在React组件中渲染列表数据时，应始终进行空值检查...",
+      "category": "前端开发",
+      "tags": ["React", "最佳实践", "错误处理"],
+      "author": "张三",
+      "createdAt": "2025-10-15T10:00:00Z",
+      "updatedAt": "2025-11-01T15:30:00Z",
+      "relatedItems": ["kb-015", "kb-032"]
+    },
+    {
+      "id": "kb-002",
+      "title": "网络请求失败处理方案",
+      "content": "处理网络请求失败的常见方案包括：重试机制、降级方案、错误提示...",
+      "category": "网络通信",
+      "tags": ["网络", "错误处理", "容错"],
+      "author": "李四",
+      "createdAt": "2025-10-20T14:00:00Z",
+      "updatedAt": "2025-10-25T09:15:00Z",
+      "relatedItems": ["kb-008"]
+    },
+    {
+      "id": "kb-003",
+      "title": "性能优化 - 减少渲染次数",
+      "content": "通过使用React.memo、useMemo、useCallback等手段减少不必要的渲染...",
+      "category": "性能优化",
+      "tags": ["React", "性能", "优化"],
+      "author": "王五",
+      "createdAt": "2025-11-01T08:30:00Z",
+      "updatedAt": "2025-11-03T16:20:00Z",
+      "relatedItems": []
+    }
+  ]
+}
+

@@ -1,0 +1,381 @@
+{
+  "atomicAgents": [
+    {
+      "id": "atomic-001",
+      "name": "代码读取Agent",
+      "category": "代码操作",
+      "description": "读取指定路径的代码文件内容",
+      "type": "atomic",
+      "icon": "file-text",
+      "capabilities": ["read_file", "parse_code"],
+      "mcpTools": ["mcp-001:read_file"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "filePath": {"type": "string", "description": "文件路径"}
+        }
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "content": {"type": "string"},
+          "language": {"type": "string"},
+          "lines": {"type": "number"}
+        }
+      },
+      "examples": [
+        {
+          "input": {"filePath": "src/pages/HomePage.tsx"},
+          "output": {"content": "...", "language": "typescript", "lines": 150}
+        }
+      ],
+      "stats": {
+        "usage": 1234,
+        "successRate": 0.98,
+        "avgTime": 25
+      }
+    },
+    {
+      "id": "atomic-002",
+      "name": "代码搜索Agent",
+      "category": "代码操作",
+      "description": "在代码库中搜索指定模式的代码",
+      "type": "atomic",
+      "icon": "search",
+      "capabilities": ["search_code", "regex_match"],
+      "mcpTools": ["mcp-001:search_files", "mcp-003:search_code"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "pattern": {"type": "string"},
+          "scope": {"type": "string", "enum": ["all", "src", "test"]}
+        }
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "results": {"type": "array"},
+          "totalMatches": {"type": "number"}
+        }
+      },
+      "stats": {
+        "usage": 856,
+        "successRate": 0.95,
+        "avgTime": 150
+      }
+    },
+    {
+      "id": "atomic-003",
+      "name": "错误解析Agent",
+      "category": "问题分析",
+      "description": "解析错误堆栈，提取关键信息",
+      "type": "atomic",
+      "icon": "bug",
+      "capabilities": ["parse_stack", "extract_info"],
+      "mcpTools": [],
+      "input": {
+        "type": "object",
+        "properties": {
+          "errorStack": {"type": "string"}
+        }
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "errorType": {"type": "string"},
+          "errorMessage": {"type": "string"},
+          "file": {"type": "string"},
+          "line": {"type": "number"},
+          "callStack": {"type": "array"}
+        }
+      },
+      "stats": {
+        "usage": 2341,
+        "successRate": 0.99,
+        "avgTime": 10
+      }
+    },
+    {
+      "id": "atomic-004",
+      "name": "API调用Agent",
+      "category": "数据获取",
+      "description": "调用外部API获取数据",
+      "type": "atomic",
+      "icon": "api",
+      "capabilities": ["http_request", "parse_response"],
+      "mcpTools": ["mcp-004:fetch_url"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "url": {"type": "string"},
+          "method": {"type": "string", "enum": ["GET", "POST"]},
+          "headers": {"type": "object"},
+          "body": {"type": "object"}
+        }
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "status": {"type": "number"},
+          "data": {"type": "any"}
+        }
+      },
+      "stats": {
+        "usage": 1567,
+        "successRate": 0.92,
+        "avgTime": 500
+      }
+    },
+    {
+      "id": "atomic-005",
+      "name": "数据库查询Agent",
+      "category": "数据获取",
+      "description": "执行数据库查询",
+      "type": "atomic",
+      "icon": "database",
+      "capabilities": ["sql_query", "data_transform"],
+      "mcpTools": ["mcp-002:query"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "sql": {"type": "string"},
+          "params": {"type": "array"}
+        }
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "rows": {"type": "array"},
+          "count": {"type": "number"}
+        }
+      },
+      "stats": {
+        "usage": 2789,
+        "successRate": 0.97,
+        "avgTime": 80
+      }
+    },
+    {
+      "id": "atomic-006",
+      "name": "相似度计算Agent",
+      "category": "AI能力",
+      "description": "计算两个文本的相似度",
+      "type": "atomic",
+      "icon": "percentage",
+      "capabilities": ["embedding", "similarity"],
+      "mcpTools": [],
+      "input": {
+        "type": "object",
+        "properties": {
+          "text1": {"type": "string"},
+          "text2": {"type": "string"}
+        }
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "similarity": {"type": "number", "min": 0, "max": 1}
+        }
+      },
+      "stats": {
+        "usage": 4523,
+        "successRate": 0.99,
+        "avgTime": 50
+      }
+    },
+    {
+      "id": "atomic-007",
+      "name": "代码修复生成Agent",
+      "category": "AI能力",
+      "description": "根据错误信息生成修复代码",
+      "type": "atomic",
+      "icon": "tool",
+      "capabilities": ["code_generation", "llm"],
+      "mcpTools": [],
+      "input": {
+        "type": "object",
+        "properties": {
+          "errorInfo": {"type": "object"},
+          "originalCode": {"type": "string"}
+        }
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "fixedCode": {"type": "string"},
+          "explanation": {"type": "string"}
+        }
+      },
+      "stats": {
+        "usage": 1234,
+        "successRate": 0.85,
+        "avgTime": 2000
+      }
+    },
+    {
+      "id": "atomic-008",
+      "name": "日志分析Agent",
+      "category": "问题分析",
+      "description": "分析日志文件，提取异常模式",
+      "type": "atomic",
+      "icon": "file-search",
+      "capabilities": ["log_parse", "pattern_match"],
+      "mcpTools": ["mcp-001:read_file", "mcp-005:query_logs"],
+      "input": {
+        "type": "object",
+        "properties": {
+          "logContent": {"type": "string"},
+          "timeRange": {"type": "object"}
+        }
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "errors": {"type": "array"},
+          "warnings": {"type": "array"},
+          "patterns": {"type": "array"}
+        }
+      },
+      "stats": {
+        "usage": 3456,
+        "successRate": 0.94,
+        "avgTime": 200
+      }
+    }
+  ],
+  "compositions": [
+    {
+      "id": "comp-001",
+      "name": "白屏问题完整分析流程",
+      "description": "组合多个原子Agent，实现白屏问题的端到端分析",
+      "type": "composition",
+      "agents": [
+        {"id": "atomic-003", "order": 1, "name": "错误解析"},
+        {"id": "atomic-001", "order": 2, "name": "代码读取"},
+        {"id": "atomic-002", "order": 3, "name": "代码搜索"},
+        {"id": "atomic-005", "order": 4, "name": "历史问题查询"},
+        {"id": "atomic-006", "order": 5, "name": "相似度计算"},
+        {"id": "atomic-007", "order": 6, "name": "修复代码生成"}
+      ],
+      "flowType": "sequential",
+      "stats": {
+        "usage": 234,
+        "successRate": 0.88,
+        "avgTime": 5000
+      }
+    },
+    {
+      "id": "comp-002",
+      "name": "代码质量检查流程",
+      "description": "检查代码质量和潜在问题",
+      "type": "composition",
+      "agents": [
+        {"id": "atomic-002", "order": 1, "name": "代码搜索"},
+        {"id": "atomic-001", "order": 2, "name": "代码读取"},
+        {"id": "atomic-008", "order": 3, "name": "模式分析"}
+      ],
+      "flowType": "parallel",
+      "stats": {
+        "usage": 456,
+        "successRate": 0.92,
+        "avgTime": 3000
+      }
+    }
+  ],
+  "marketplace": [
+    {
+      "id": "market-001",
+      "name": "性能分析Agent",
+      "author": "张三",
+      "category": "性能优化",
+      "description": "分析应用性能瓶颈，提供优化建议",
+      "rating": 4.8,
+      "downloads": 1234,
+      "price": "免费",
+      "tags": ["性能", "优化", "分析"],
+      "atomicAgents": ["atomic-005", "atomic-008"],
+      "thumbnail": "/images/performance-agent.png"
+    },
+    {
+      "id": "market-002",
+      "name": "安全扫描Agent",
+      "author": "李四",
+      "category": "安全",
+      "description": "扫描代码中的安全漏洞",
+      "rating": 4.6,
+      "downloads": 856,
+      "price": "¥99/月",
+      "tags": ["安全", "扫描", "漏洞"],
+      "atomicAgents": ["atomic-001", "atomic-002"],
+      "thumbnail": "/images/security-agent.png"
+    },
+    {
+      "id": "market-003",
+      "name": "测试用例生成Agent",
+      "author": "王五",
+      "category": "测试",
+      "description": "根据代码自动生成测试用例",
+      "rating": 4.7,
+      "downloads": 2341,
+      "price": "免费",
+      "tags": ["测试", "自动化", "质量"],
+      "atomicAgents": ["atomic-001", "atomic-007"],
+      "thumbnail": "/images/test-agent.png"
+    },
+    {
+      "id": "market-004",
+      "name": "聚类分析Agent",
+      "author": "AI Work Studio",
+      "category": "数据分析",
+      "description": "对用户反馈、错误日志等数据进行智能聚类分析，发现问题模式和趋势",
+      "rating": 4.9,
+      "downloads": 3456,
+      "price": "免费",
+      "tags": ["聚类", "数据分析", "模式识别"],
+      "atomicAgents": ["atomic-006", "atomic-008"],
+      "thumbnail": "/images/cluster-agent.png"
+    },
+    {
+      "id": "market-005",
+      "name": "变更分析Agent",
+      "author": "AI Work Studio",
+      "category": "版本管理",
+      "description": "分析代码变更对系统的影响，识别潜在风险和关联问题",
+      "rating": 4.8,
+      "downloads": 2789,
+      "price": "免费",
+      "tags": ["变更分析", "风险评估", "影响分析"],
+      "atomicAgents": ["atomic-001", "atomic-002", "atomic-005"],
+      "thumbnail": "/images/change-agent.png"
+    },
+    {
+      "id": "market-006",
+      "name": "复现路径推理Agent",
+      "author": "AI Work Studio",
+      "category": "问题分析",
+      "description": "基于错误信息和用户行为，智能推理问题的复现路径和触发条件",
+      "rating": 4.7,
+      "downloads": 1987,
+      "price": "免费",
+      "tags": ["复现路径", "问题分析", "智能推理"],
+      "atomicAgents": ["atomic-003", "atomic-008"],
+      "thumbnail": "/images/reproduction-agent.png"
+    },
+    {
+      "id": "market-007",
+      "name": "UI自动执行Agent",
+      "author": "AI Work Studio",
+      "category": "自动化",
+      "description": "自动执行UI操作，模拟用户行为进行测试和问题复现",
+      "rating": 4.6,
+      "downloads": 1654,
+      "price": "免费",
+      "tags": ["UI自动化", "测试", "操作模拟"],
+      "atomicAgents": ["atomic-004"],
+      "thumbnail": "/images/ui-automation-agent.png"
+    }
+  ]
+}
+
+
+

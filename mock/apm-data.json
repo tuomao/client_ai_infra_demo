@@ -1,0 +1,82 @@
+{
+  "logs": [
+    {
+      "id": "log-001",
+      "timestamp": "2025-11-06T10:30:00Z",
+      "level": "error",
+      "message": "Cannot read property 'map' of undefined",
+      "stack": "TypeError: Cannot read property 'map' of undefined\n    at HomePage.render (HomePage.tsx:45:28)",
+      "metadata": {
+        "userId": "user-12345",
+        "sessionId": "session-abc123",
+        "page": "/home"
+      }
+    },
+    {
+      "id": "log-002",
+      "timestamp": "2025-11-06T10:29:55Z",
+      "level": "warn",
+      "message": "API响应时间过长: 3200ms",
+      "metadata": {
+        "api": "/api/items",
+        "duration": 3200
+      }
+    },
+    {
+      "id": "log-003",
+      "timestamp": "2025-11-06T10:29:50Z",
+      "level": "info",
+      "message": "用户进入首页",
+      "metadata": {
+        "userId": "user-12345",
+        "page": "/home"
+      }
+    }
+  ],
+  "metrics": [
+    {
+      "name": "page_load_time",
+      "value": 2500,
+      "unit": "ms",
+      "timestamp": "2025-11-06T10:30:00Z",
+      "tags": {
+        "page": "home",
+        "device": "mobile"
+      }
+    },
+    {
+      "name": "api_response_time",
+      "value": 1200,
+      "unit": "ms",
+      "timestamp": "2025-11-06T10:30:00Z",
+      "tags": {
+        "endpoint": "/api/items",
+        "status": "200"
+      }
+    },
+    {
+      "name": "memory_usage",
+      "value": 156.8,
+      "unit": "MB",
+      "timestamp": "2025-11-06T10:30:00Z",
+      "tags": {
+        "device": "iPhone 14 Pro"
+      }
+    }
+  ],
+  "stability": {
+    "crashRate": 0.012,
+    "anrRate": 0.005,
+    "oomRate": 0.003,
+    "errorRate": 0.028,
+    "availability": 0.9972
+  },
+  "performance": {
+    "startupTime": 1800,
+    "pageLoadTime": 2500,
+    "apiResponseTime": 450,
+    "fps": 58,
+    "memoryUsage": 156.8
+  }
+}
+

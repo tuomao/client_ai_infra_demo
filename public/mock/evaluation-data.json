@@ -1,0 +1,257 @@
+{
+  "testSuites": [
+    {
+      "id": "suite-001",
+      "name": "白屏问题评测集",
+      "category": "白屏归因",
+      "description": "用于评测白屏问题分析Agent的准确性和效率",
+      "version": "v1.2.0",
+      "testCaseCount": 156,
+      "lastUpdated": "2024-01-15",
+      "status": "active",
+      "metrics": ["准确率", "召回率", "F1分数", "平均响应时间"],
+      "tags": ["白屏", "前端", "归因"]
+    },
+    {
+      "id": "suite-002",
+      "name": "Crash归因评测集",
+      "category": "崩溃分析",
+      "description": "用于评测崩溃问题分析Agent的性能",
+      "version": "v1.0.3",
+      "testCaseCount": 89,
+      "lastUpdated": "2024-01-10",
+      "status": "active",
+      "metrics": ["准确率", "根因定位率", "平均响应时间"],
+      "tags": ["崩溃", "异常", "分析"]
+    },
+    {
+      "id": "suite-003",
+      "name": "性能优化评测集",
+      "category": "性能分析",
+      "description": "用于评测性能分析Agent的效果",
+      "version": "v2.1.0",
+      "testCaseCount": 234,
+      "lastUpdated": "2024-01-18",
+      "status": "active",
+      "metrics": ["优化建议准确率", "性能提升率", "分析深度"],
+      "tags": ["性能", "优化", "trace"]
+    }
+  ],
+  "testCases": [
+    {
+      "id": "case-001",
+      "suiteId": "suite-001",
+      "name": "组件初始化失败导致白屏",
+      "type": "白屏",
+      "difficulty": "中等",
+      "input": {
+        "errorStack": "TypeError: Cannot read property 'init' of undefined\n  at ComponentA.componentDidMount (App.js:123:15)",
+        "environment": {
+          "browser": "Chrome 120",
+          "os": "MacOS 14",
+          "deviceType": "Desktop"
+        },
+        "userActions": ["打开页面"],
+        "timestamp": "2024-01-15 10:30:00"
+      },
+      "expectedOutput": {
+        "rootCause": "组件初始化时依赖的模块未正确加载",
+        "confidence": 0.95,
+        "fixSuggestion": "检查模块导入和初始化顺序",
+        "relatedFiles": ["App.js", "ComponentA.js"]
+      },
+      "createTime": "2024-01-10",
+      "lastRunTime": "2024-01-15",
+      "passRate": 0.92
+    },
+    {
+      "id": "case-002",
+      "suiteId": "suite-001",
+      "name": "API接口超时导致白屏",
+      "type": "白屏",
+      "difficulty": "简单",
+      "input": {
+        "errorStack": "Error: Request timeout after 30000ms\n  at fetch (api.js:45:12)",
+        "environment": {
+          "browser": "Safari 17",
+          "os": "iOS 17",
+          "deviceType": "Mobile"
+        },
+        "userActions": ["登录", "进入首页"],
+        "timestamp": "2024-01-14 15:20:00"
+      },
+      "expectedOutput": {
+        "rootCause": "API接口响应超时，未设置loading和超时处理",
+        "confidence": 0.98,
+        "fixSuggestion": "添加超时处理和错误提示",
+        "relatedFiles": ["api.js", "HomePage.js"]
+      },
+      "createTime": "2024-01-08",
+      "lastRunTime": "2024-01-14",
+      "passRate": 0.98
+    }
+  ],
+  "evaluationTasks": [
+    {
+      "id": "task-001",
+      "name": "白屏Agent v2.0 准确性评测",
+      "suiteId": "suite-001",
+      "agentId": "agent-white-screen-v2",
+      "agentName": "白屏归因Agent v2.0",
+      "status": "completed",
+      "progress": 100,
+      "startTime": "2024-01-15 09:00:00",
+      "endTime": "2024-01-15 10:30:00",
+      "duration": "1小时30分",
+      "testCaseTotal": 156,
+      "testCasePassed": 143,
+      "testCaseFailed": 13,
+      "metrics": {
+        "accuracy": 0.917,
+        "precision": 0.925,
+        "recall": 0.908,
+        "f1Score": 0.916,
+        "avgResponseTime": 2.3,
+        "maxResponseTime": 8.5,
+        "minResponseTime": 0.8
+      },
+      "creator": "张三",
+      "createTime": "2024-01-15 08:55:00"
+    },
+    {
+      "id": "task-002",
+      "name": "白屏Agent v1.5 对比评测",
+      "suiteId": "suite-001",
+      "agentId": "agent-white-screen-v1.5",
+      "agentName": "白屏归因Agent v1.5",
+      "status": "completed",
+      "progress": 100,
+      "startTime": "2024-01-14 14:00:00",
+      "endTime": "2024-01-14 15:45:00",
+      "duration": "1小时45分",
+      "testCaseTotal": 156,
+      "testCasePassed": 128,
+      "testCaseFailed": 28,
+      "metrics": {
+        "accuracy": 0.821,
+        "precision": 0.835,
+        "recall": 0.805,
+        "f1Score": 0.820,
+        "avgResponseTime": 3.2,
+        "maxResponseTime": 12.5,
+        "minResponseTime": 1.2
+      },
+      "creator": "李四",
+      "createTime": "2024-01-14 13:55:00"
+    },
+    {
+      "id": "task-003",
+      "name": "Crash分析Agent 完整评测",
+      "suiteId": "suite-002",
+      "agentId": "agent-crash-v1",
+      "agentName": "Crash归因Agent v1.0",
+      "status": "running",
+      "progress": 65,
+      "startTime": "2024-01-18 10:00:00",
+      "endTime": null,
+      "duration": "进行中",
+      "testCaseTotal": 89,
+      "testCasePassed": 52,
+      "testCaseFailed": 6,
+      "metrics": {
+        "accuracy": 0.896,
+        "precision": 0.905,
+        "recall": 0.887,
+        "f1Score": 0.896,
+        "avgResponseTime": 1.8,
+        "maxResponseTime": 5.2,
+        "minResponseTime": 0.5
+      },
+      "creator": "王五",
+      "createTime": "2024-01-18 09:55:00"
+    }
+  ],
+  "comparisonReports": [
+    {
+      "id": "compare-001",
+      "name": "白屏Agent v2.0 vs v1.5 对比分析",
+      "type": "版本对比",
+      "taskIds": ["task-001", "task-002"],
+      "createTime": "2024-01-15 11:00:00",
+      "summary": {
+        "winner": "agent-white-screen-v2",
+        "improvements": [
+          { "metric": "准确率", "improvement": "+11.7%" },
+          { "metric": "响应时间", "improvement": "-28.1%" },
+          { "metric": "F1分数", "improvement": "+11.7%" }
+        ],
+        "conclusion": "v2.0版本在准确性和性能上都有显著提升"
+      }
+    }
+  ],
+  "evaluationMetrics": [
+    {
+      "key": "accuracy",
+      "name": "准确率",
+      "description": "正确判断的案例占总案例的比例",
+      "unit": "%",
+      "higherIsBetter": true,
+      "threshold": {
+        "excellent": 0.95,
+        "good": 0.85,
+        "acceptable": 0.75
+      }
+    },
+    {
+      "key": "precision",
+      "name": "精确率",
+      "description": "预测为正例中真正正例的比例",
+      "unit": "%",
+      "higherIsBetter": true,
+      "threshold": {
+        "excellent": 0.95,
+        "good": 0.85,
+        "acceptable": 0.75
+      }
+    },
+    {
+      "key": "recall",
+      "name": "召回率",
+      "description": "所有正例中被正确识别的比例",
+      "unit": "%",
+      "higherIsBetter": true,
+      "threshold": {
+        "excellent": 0.95,
+        "good": 0.85,
+        "acceptable": 0.75
+      }
+    },
+    {
+      "key": "f1Score",
+      "name": "F1分数",
+      "description": "精确率和召回率的调和平均",
+      "unit": "%",
+      "higherIsBetter": true,
+      "threshold": {
+        "excellent": 0.95,
+        "good": 0.85,
+        "acceptable": 0.75
+      }
+    },
+    {
+      "key": "avgResponseTime",
+      "name": "平均响应时间",
+      "description": "Agent分析单个案例的平均耗时",
+      "unit": "秒",
+      "higherIsBetter": false,
+      "threshold": {
+        "excellent": 2.0,
+        "good": 5.0,
+        "acceptable": 10.0
+      }
+    }
+  ]
+}
+
+
+

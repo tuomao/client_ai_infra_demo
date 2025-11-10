@@ -1,0 +1,273 @@
+{
+  "experiments": {
+    "monitoring": [
+      {
+        "id": "exp-141690",
+        "name": "对话页容器按需加载适配预加载策略",
+        "status": "monitoring",
+        "changeTime": "2025-11-06 14:30:00",
+        "changeBy": "张三",
+        "agentStatus": "active",
+        "type": "experiment",
+        "metrics": {
+          "userCount": 12450,
+          "crashRate": "0.02%",
+          "performanceScore": 98,
+          "abnormalSignals": 0
+        },
+        "progress": 35,
+        "targetUsers": "iOS 9.3+ 用户",
+        "description": "优化对话页容器加载策略，提升首屏性能"
+      },
+      {
+        "id": "exp-142108",
+        "name": "笔记详情页图片预加载优化",
+        "status": "monitoring",
+        "changeTime": "2025-11-06 10:15:00",
+        "changeBy": "李四",
+        "agentStatus": "active",
+        "type": "experiment",
+        "metrics": {
+          "userCount": 8920,
+          "crashRate": "0.01%",
+          "performanceScore": 96,
+          "abnormalSignals": 0
+        },
+        "progress": 58,
+        "targetUsers": "Android 全量用户",
+        "description": "笔记详情页图片预加载策略调整"
+      },
+      {
+        "id": "exp-142256",
+        "name": "推送通知开关配置优化",
+        "status": "monitoring",
+        "changeTime": "2025-11-06 16:00:00",
+        "changeBy": "王五",
+        "agentStatus": "warning",
+        "type": "switch_platform",
+        "metrics": {
+          "userCount": 28650,
+          "crashRate": "0.08%",
+          "performanceScore": 85,
+          "abnormalSignals": 3
+        },
+        "progress": 22,
+        "targetUsers": "全量用户",
+        "description": "优化推送通知开关逻辑，支持细粒度控制",
+        "businessContext": {
+          "feature": "推送通知设置",
+          "switchType": "多级开关",
+          "affectedSettings": ["消息推送", "营销推送", "系统通知", "直播提醒"]
+        },
+        "riskIndicators": {
+          "feedbackSurge": true,
+          "feedbackIncrease": "+340%",
+          "correlationScore": 0.92,
+          "mainIssues": [
+            "推送开关失效，用户无法关闭通知",
+            "开关状态与实际推送不一致",
+            "部分用户反馈收到已关闭的推送类型"
+          ]
+        }
+      }
+    ],
+    "pendingRollout": [
+      {
+        "id": "exp-140523",
+        "name": "搜索结果页卡片样式优化",
+        "status": "success",
+        "startDate": "2025-10-20",
+        "endDate": "2025-11-05",
+        "duration": 16,
+        "metrics": {
+          "userCount": 50000,
+          "crashRate": "0.01%",
+          "conversionRate": "+12.5%",
+          "performanceScore": 97
+        },
+        "recommendation": "建议推全",
+        "reason": "所有指标表现良好，用户反馈积极",
+        "targetUsers": "全量用户",
+        "expectedImpact": "预计DAU提升8-10%"
+      },
+      {
+        "id": "exp-140892",
+        "name": "直播间互动栏UI改版",
+        "status": "success",
+        "startDate": "2025-10-25",
+        "endDate": "2025-11-06",
+        "duration": 12,
+        "metrics": {
+          "userCount": 35000,
+          "crashRate": "0.02%",
+          "conversionRate": "+18.3%",
+          "performanceScore": 95
+        },
+        "recommendation": "建议推全",
+        "reason": "互动率提升明显，性能稳定",
+        "targetUsers": "直播用户",
+        "expectedImpact": "预计直播间停留时长提升15%"
+      },
+      {
+        "id": "exp-141205",
+        "name": "个人主页加载优化",
+        "status": "warning",
+        "startDate": "2025-10-28",
+        "endDate": "2025-11-06",
+        "duration": 9,
+        "metrics": {
+          "userCount": 28000,
+          "crashRate": "0.03%",
+          "conversionRate": "+5.2%",
+          "performanceScore": 92
+        },
+        "recommendation": "建议观察",
+        "reason": "崩溃率略高于基线，建议延长观察",
+        "targetUsers": "iOS 用户",
+        "expectedImpact": "预计页面加载速度提升20%"
+      }
+    ],
+    "risks": [
+      {
+        "id": "exp-141988",
+        "name": "商品详情页下单流程优化",
+        "status": "risk",
+        "riskLevel": "high",
+        "riskType": "performance",
+        "detectedTime": "2025-11-06 16:45:00",
+        "metrics": {
+          "userCount": 15200,
+          "crashRate": "0.15%",
+          "performanceScore": 78,
+          "abnormalSignals": 5
+        },
+        "issues": [
+          {
+            "type": "crash",
+            "description": "Android 10设备频繁崩溃",
+            "affectedUsers": 1200,
+            "severity": "high"
+          },
+          {
+            "type": "performance",
+            "description": "页面加载时间增加300ms",
+            "affectedUsers": 8900,
+            "severity": "medium"
+          }
+        ],
+        "agentAnalysis": "检测到异常崩溃增长，建议立即回滚",
+        "suggestedAction": "立即回滚",
+        "progress": 15
+      },
+      {
+        "id": "exp-142001",
+        "name": "消息推送策略调整",
+        "status": "risk",
+        "riskLevel": "medium",
+        "riskType": "data",
+        "detectedTime": "2025-11-06 15:20:00",
+        "metrics": {
+          "userCount": 22000,
+          "crashRate": "0.02%",
+          "performanceScore": 94,
+          "abnormalSignals": 2
+        },
+        "issues": [
+          {
+            "type": "data",
+            "description": "消息点击率下降18%",
+            "affectedUsers": 22000,
+            "severity": "medium"
+          }
+        ],
+        "agentAnalysis": "推送策略可能过于激进，建议调整参数",
+        "suggestedAction": "调整参数后继续观察",
+        "progress": 25
+      }
+    ]
+  },
+  "todos": [
+    {
+      "id": "todo-001",
+      "type": "experiment_solidify",
+      "title": "实验固化",
+      "description": "直播间礼物动效优化实验已验证有效，转化率提升15%，需要固化到主分支",
+      "priority": "high",
+      "status": "pending",
+      "experiment": {
+        "name": "直播间礼物动效优化",
+        "effect": "转化率+15%",
+        "duration": "14天",
+        "confidence": "95%"
+      },
+      "action": {
+        "text": "使用Agent帮你固化",
+        "agent": "实验固化Agent"
+      }
+    },
+    {
+      "id": "todo-002", 
+      "type": "stability_analysis",
+      "title": "稳定性排查",
+      "description": "检测到商品详情页ANR率异常上升，影响用户购买体验，需要紧急排查",
+      "priority": "high",
+      "status": "analyzing",
+      "stability": {
+        "metric": "ANR率",
+        "increase": "+180%",
+        "affectedPage": "商品详情页",
+        "timeRange": "最近6小时"
+      },
+      "action": {
+        "text": "Agent正在为你分析",
+        "agent": "稳定性分析Agent"
+      }
+    },
+    {
+      "id": "todo-003",
+      "type": "feedback_analysis", 
+      "title": "反馈排查",
+      "description": "用户反馈搜索功能异常激增，关键词集中在搜不到、结果不准等问题，需要深度分析",
+      "priority": "medium",
+      "status": "analyzing",
+      "feedback": {
+        "count": 342,
+        "keywords": ["搜不到", "结果不准", "搜索卡死"],
+        "feature": "搜索功能",
+        "timeRange": "最近12小时"
+      },
+      "action": {
+        "text": "Agent正在为你分析",
+        "agent": "反馈分析Agent"
+      }
+    },
+    {
+      "id": "todo-004",
+      "type": "rollout_recommendation",
+      "title": "放量推荐",
+      "description": "个性化推荐算法V3已放量30%运行48小时，点击率提升12%，各项指标正常，建议扩大放量",
+      "priority": "medium", 
+      "status": "recommend",
+      "rollout": {
+        "feature": "个性化推荐算法V3",
+        "currentPercent": "30%",
+        "duration": "48小时",
+        "improvement": "点击率+12%",
+        "recommendation": "扩大到60%"
+      },
+      "action": {
+        "text": "继续放量",
+        "agent": "放量推荐Agent"
+      }
+    }
+  ],
+  "statistics": {
+    "totalExperiments": 46,
+    "monitoringCount": 3,
+    "pendingRolloutCount": 3,
+    "riskCount": 2,
+    "todayChanges": 5,
+    "weeklySuccess": 12
+  }
+}
+

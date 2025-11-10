@@ -1,0 +1,54 @@
+{
+  "agents": [
+    {
+      "id": "agent-001",
+      "name": "白屏归因Agent",
+      "type": "white-screen",
+      "description": "自动分析白屏问题的根本原因，提供详细的错误分析和修复建议",
+      "strategy": "plan-execute",
+      "enabled": true,
+      "config": {
+        "autoAnalyze": true,
+        "confidenceThreshold": 0.8,
+        "maxAnalysisTime": 30000
+      }
+    },
+    {
+      "id": "agent-002",
+      "name": "Crash归因Agent",
+      "type": "crash",
+      "description": "分析应用崩溃问题，定位崩溃根因",
+      "strategy": "react",
+      "enabled": true,
+      "config": {
+        "autoAnalyze": true,
+        "includeSystemCrash": false
+      }
+    },
+    {
+      "id": "agent-003",
+      "name": "巡检Agent",
+      "type": "patrol",
+      "description": "定期巡检应用健康状态，发现潜在问题",
+      "strategy": "sequence",
+      "enabled": true,
+      "config": {
+        "interval": 3600000,
+        "checkItems": ["api", "performance", "error-rate"]
+      }
+    },
+    {
+      "id": "agent-004",
+      "name": "热修代码生成Agent",
+      "type": "hotfix-generate",
+      "description": "基于问题分析自动生成修复代码",
+      "strategy": "plan-execute",
+      "enabled": true,
+      "config": {
+        "language": "typescript",
+        "includeTests": true
+      }
+    }
+  ]
+}
+

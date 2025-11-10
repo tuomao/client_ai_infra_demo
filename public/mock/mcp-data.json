@@ -1,0 +1,259 @@
+{
+  "servers": [
+    {
+      "id": "mcp-001",
+      "name": "Filesystem MCP Server",
+      "description": "提供文件系统操作能力，支持读取、写入、搜索文件",
+      "status": "running",
+      "protocol": "stdio",
+      "command": "node",
+      "args": ["dist/index.js"],
+      "capabilities": [
+        {
+          "type": "resources",
+          "count": 5,
+          "items": ["file://", "directory://"]
+        },
+        {
+          "type": "tools",
+          "count": 8,
+          "items": ["read_file", "write_file", "search_files", "list_directory"]
+        }
+      ],
+      "stats": {
+        "requests": 1234,
+        "errors": 12,
+        "avgResponseTime": 45,
+        "uptime": "15天"
+      },
+      "config": {
+        "baseDir": "/workspace",
+        "maxFileSize": "10MB",
+        "allowedExtensions": [".ts", ".tsx", ".js", ".jsx", ".json", ".md"]
+      }
+    },
+    {
+      "id": "mcp-002",
+      "name": "Git MCP Server",
+      "description": "提供Git仓库操作能力，支持代码搜索、diff、历史查询",
+      "status": "running",
+      "protocol": "stdio",
+      "command": "python",
+      "args": ["mcp_server_git.py"],
+      "capabilities": [
+        {
+          "type": "resources",
+          "count": 4,
+          "items": ["git://", "commit://", "branch://"]
+        },
+        {
+          "type": "tools",
+          "count": 10,
+          "items": ["git_log", "git_diff", "git_blame", "search_code"]
+        }
+      ],
+      "stats": {
+        "requests": 567,
+        "errors": 8,
+        "avgResponseTime": 200,
+        "uptime": "7天"
+      },
+      "config": {
+        "repoPath": "/workspace/repo",
+        "branch": "main"
+      }
+    },
+    {
+      "id": "mcp-004",
+      "name": "Web Search MCP Server",
+      "description": "提供网络搜索能力，可以搜索技术文档、Stack Overflow等",
+      "status": "running",
+      "protocol": "sse",
+      "url": "http://localhost:3002/mcp",
+      "capabilities": [
+        {
+          "type": "resources",
+          "count": 2,
+          "items": ["https://", "http://"]
+        },
+        {
+          "type": "tools",
+          "count": 5,
+          "items": ["web_search", "fetch_url", "extract_content"]
+        }
+      ],
+      "stats": {
+        "requests": 423,
+        "errors": 15,
+        "avgResponseTime": 800,
+        "uptime": "5天"
+      },
+      "config": {
+        "apiKey": "sk-***",
+        "maxResults": 10
+      }
+    },
+    {
+      "id": "mcp-005",
+      "name": "APM MCP Server",
+      "description": "提供应用性能监控数据访问能力",
+      "status": "stopped",
+      "protocol": "sse",
+      "url": "http://localhost:3003/mcp",
+      "capabilities": [
+        {
+          "type": "resources",
+          "count": 6,
+          "items": ["apm://logs", "apm://metrics", "apm://traces"]
+        },
+        {
+          "type": "tools",
+          "count": 12,
+          "items": ["query_logs", "get_metrics", "trace_analysis"]
+        }
+      ],
+      "stats": {
+        "requests": 0,
+        "errors": 0,
+        "avgResponseTime": 0,
+        "uptime": "0天"
+      },
+      "config": {
+        "endpoint": "http://apm.internal",
+        "token": "***"
+      }
+    }
+  ],
+  "resources": [
+    {
+      "id": "res-001",
+      "uri": "file:///workspace/src/pages/HomePage.tsx",
+      "name": "HomePage组件",
+      "mimeType": "text/x-typescript",
+      "server": "mcp-001",
+      "size": 2048,
+      "lastModified": "2025-11-06T10:30:00Z"
+    },
+    {
+      "id": "res-002",
+      "uri": "postgres://ai_infra/white_screen_issues",
+      "name": "白屏问题表",
+      "mimeType": "application/sql",
+      "server": "mcp-002",
+      "size": 156789,
+      "lastModified": "2025-11-06T09:15:00Z"
+    },
+    {
+      "id": "res-003",
+      "uri": "git://commits/HEAD~10..HEAD",
+      "name": "最近10次提交",
+      "mimeType": "application/x-git",
+      "server": "mcp-003",
+      "size": 4096,
+      "lastModified": "2025-11-06T08:45:00Z"
+    }
+  ],
+  "tools": [
+    {
+      "id": "tool-001",
+      "name": "read_file",
+      "description": "读取文件内容",
+      "server": "mcp-001",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string", "description": "文件路径"},
+          "encoding": {"type": "string", "default": "utf-8"}
+        },
+        "required": ["path"]
+      },
+      "usage": 234,
+      "avgTime": 25
+    },
+    {
+      "id": "tool-002",
+      "name": "write_file",
+      "description": "写入文件内容",
+      "server": "mcp-001",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string"},
+          "content": {"type": "string"},
+          "encoding": {"type": "string", "default": "utf-8"}
+        },
+        "required": ["path", "content"]
+      },
+      "usage": 123,
+      "avgTime": 35
+    },
+    {
+      "id": "tool-003",
+      "name": "search_files",
+      "description": "搜索文件内容",
+      "server": "mcp-001",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "pattern": {"type": "string"},
+          "path": {"type": "string"},
+          "regex": {"type": "boolean", "default": false}
+        },
+        "required": ["pattern"]
+      },
+      "usage": 456,
+      "avgTime": 150
+    },
+    {
+      "id": "tool-004",
+      "name": "query",
+      "description": "执行SQL查询",
+      "server": "mcp-002",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "sql": {"type": "string"},
+          "params": {"type": "array"}
+        },
+        "required": ["sql"]
+      },
+      "usage": 567,
+      "avgTime": 80
+    },
+    {
+      "id": "tool-005",
+      "name": "git_log",
+      "description": "查看Git提交历史",
+      "server": "mcp-003",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "limit": {"type": "number", "default": 10},
+          "author": {"type": "string"},
+          "since": {"type": "string"}
+        }
+      },
+      "usage": 234,
+      "avgTime": 120
+    },
+    {
+      "id": "tool-006",
+      "name": "web_search",
+      "description": "搜索网络内容",
+      "server": "mcp-004",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "query": {"type": "string"},
+          "maxResults": {"type": "number", "default": 10}
+        },
+        "required": ["query"]
+      },
+      "usage": 345,
+      "avgTime": 600
+    }
+  ]
+}
+
+
+
