@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Card, Button, Space, Input, Select, Tag, Steps, Alert, Progress, Divider, Row, Col, Statistic, Badge, Popover, List, App, message } from 'antd';
+import React, { useState, useEffect, useRef } from 'react';
+import { Card, Button, Space, Input, Select, Tag, Steps, Alert, Progress, Divider, Row, Col, Statistic, Badge, Popover, List, App, message, Collapse } from 'antd';
 import {
   AimOutlined,
   LoadingOutlined,
@@ -9,9 +9,20 @@ import {
   ReloadOutlined,
   StopOutlined,
   SearchOutlined,
-  CloseOutlined
+  CloseOutlined,
+  CheckCircleOutlined,
+  BulbOutlined,
+  DownOutlined,
+  UpOutlined
 } from '@ant-design/icons';
 import MainLayout from '@/components/layout/MainLayout';
+import StreamingText from './StreamingText';
+import { 
+  generateThinkingContent, 
+  generateDetailedAnalysis, 
+  generateAnalysisResult,
+  generateFinalConclusion 
+} from './analysisDataGenerator';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -53,13 +64,45 @@ interface UniversalAgentProps {
   config: AgentConfig;
 }
 
+type AnalysisPhase = 'initial' | 'thinking' | 'todo-list' | 'conclusion';
+
+interface TodoItem {
+  key: string;
+  title: string;
+  target: string;
+  status: 'pending' | 'running' | 'completed' | 'skipped';
+  detailedAnalysis: string; // 详细分析过程（流式输出）
+  result: {
+    summary: string; // 结果摘要（显示在左侧卡片）
+    fullResult: any; // 完整结果（展开时显示）
+    confidence: number; // 置信度，用于判断是否可以提前终止
+  } | null;
+}
+
 export default function UniversalAgent({ config }: UniversalAgentProps) {
   const [viewMode, setViewMode] = useState<'initial' | 'analysis'>('initial');
+  const [analysisPhase, setAnalysisPhase] = useState<AnalysisPhase>('initial');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisSteps, setAnalysisSteps] = useState<any[]>([]);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [expandedPanels, setExpandedPanels] = useState<string[]>([]);
+  
+  // 阶段一：思考内容
+  const [thinkingContent, setThinkingContent] = useState('');
+  const [thinkingComplete, setThinkingComplete] = useState(false);
+  
+  // 阶段二：TODO List
+  const [todoList, setTodoList] = useState<TodoItem[]>([]);
+  const [currentTodoIndex, setCurrentTodoIndex] = useState<number | null>(null);
+  const [expandedTodos, setExpandedTodos] = useState<string[]>([]);
+  const [streamedTodos, setStreamedTodos] = useState<Set<string>>(new Set()); // 记录已完成流式输出的TODO
+  
+  // 阶段三：最终结论
+  const [finalConclusion, setFinalConclusion] = useState('');
+  const [conclusionComplete, setConclusionComplete] = useState(false);
+  
+  // 滚动容器ref
+  const leftPanelScrollRef = useRef<HTMLDivElement>(null);
+  const rightPanelScrollRef = useRef<HTMLDivElement>(null);
+  
   const [abortController, setAbortController] = useState<AbortController | null>(null);
 
   // 输入状态
@@ -105,139 +148,197 @@ export default function UniversalAgent({ config }: UniversalAgentProps) {
     return iconMap[categoryName] || '🔍';
   };
 
-  // 动态生成分析计划
-  const generateAnalysisPlan = (problemText: string, problemType: string) => {
-    const plans: Array<{
-      key: string;
-      title: string;
-      target: string;
-      content: string;
-      status: 'pending' | 'running' | 'completed';
-      showContent: boolean;
-      result: any;
-    }> = [];
+  // 生成思考内容（使用智能生成器）
+  const generateThinkingContentLocal = (problemText: string): string => {
+    return generateThinkingContent(problemText, config.id, config.name, selectedProblemType);
+  };
+
+  // 生成TODO List
+  const generateTodoList = (problemText: string): TodoItem[] => {
+    const todos: TodoItem[] = [];
     
-    // 根据不同的Agent类型和问题类型生成不同的分析计划
     config.capabilities.forEach((capability, index) => {
-      plans.push({
-        key: `plan_${index}`,
+      todos.push({
+        key: `todo_${index}`,
         title: capability.name,
-        target: `分析${problemText}中的${capability.name}相关问题`,
-        content: capability.description,
-        status: 'pending' as const,
-        showContent: false,
+        target: `分析${problemText.substring(0, 50)}${problemText.length > 50 ? '...' : ''}中的${capability.name}相关问题`,
+        status: 'pending',
+        detailedAnalysis: '',
         result: null
       });
     });
 
-    return plans;
+    return todos;
   };
 
-  // 生成分析结果
-  const generateAnalysisResult = (capability: any, problemText: string) => {
-    // 根据不同能力生成不同的分析结果
-    const resultTypes = {
-      '聚类分析': {
-        type: 'clustering',
-        data: {
-          clusters: [
-            { id: 1, name: '核心问题集群', count: 45, keywords: ['响应慢', '超时', '卡顿'] },
-            { id: 2, name: '次要问题集群', count: 23, keywords: ['界面异常', '显示错误'] }
-          ],
-          summary: '发现2个主要问题集群，核心问题集中在性能相关'
-        }
-      },
-      '变更分析': {
-        type: 'change',
-        data: {
-          changes: [
-            { id: 1, type: '代码变更', time: '2小时前', impact: 'high', description: '用户服务接口优化' },
-            { id: 2, type: '配置变更', time: '1小时前', impact: 'medium', description: '数据库连接池配置调整' }
-          ],
-          summary: '发现2个相关变更，可能与当前问题相关'
-        }
-      },
-      '日志分析': {
-        type: 'log',
-        data: {
-          errors: [
-            { level: 'ERROR', count: 156, message: 'Connection timeout' },
-            { level: 'WARN', count: 89, message: 'Slow query detected' }
-          ],
-          summary: '日志中发现156个错误和89个警告'
-        }
-      },
-      '代码分析': {
-        type: 'code',
-        data: {
-          issues: [
-            { type: '性能问题', file: 'UserService.java', line: 45, description: '数据库查询未优化' },
-            { type: '内存泄漏', file: 'CacheManager.java', line: 123, description: '缓存对象未正确释放' }
-          ],
-          summary: '代码分析发现2个潜在问题'
-        }
-      }
-    };
-
-    return resultTypes[capability.name as keyof typeof resultTypes] || {
-      type: 'generic',
-      data: { summary: `${capability.name}分析完成` }
-    };
+  // 生成详细分析过程（使用智能生成器）
+  const generateDetailedAnalysisLocal = (capability: any, problemText: string): string => {
+    return generateDetailedAnalysis(capability, problemText, config.id);
   };
 
-  // 开始分析过程
-  const startAnalysisProcess = async () => {
-    const plans = generateAnalysisPlan(inputText, selectedProblemType);
-    setAnalysisSteps(plans);
+  // 生成分析结果（使用智能生成器）
+  const generateAnalysisResultLocal = (capability: any, problemText: string) => {
+    return generateAnalysisResult(capability, problemText, config.id);
+  };
+
+  // PlanningAgent: 判断是否可以提前终止
+  const shouldEarlyTerminate = (completedTodos: TodoItem[]): boolean => {
+    // 如果某个TODO的置信度超过0.9，且结果明确指向根本原因，可以提前终止
+    const highConfidenceTodo = completedTodos.find(todo => 
+      todo.result && todo.result.confidence >= 0.9
+    );
     
-    const controller = new AbortController();
-    setAbortController(controller);
-    
-    try {
-      await executeAnalysisPlans(plans, controller);
-    } catch (error: any) {
-      if (error.name !== 'AbortError') {
-        console.error('Analysis failed:', error);
-        message.error('分析过程中出现错误');
+    if (highConfidenceTodo) {
+      // 检查结果是否明确指向根本原因
+      const result = highConfidenceTodo.result!.fullResult;
+      if (result.type === 'log' && result.data.errors.some((e: any) => e.level === 'ERROR')) {
+        return true; // 日志分析发现明确的错误，可以提前终止
       }
     }
+    
+    return false;
   };
 
-  // 执行分析计划
-  const executeAnalysisPlans = async (plans: any[], controller: AbortController) => {
-    for (let i = 0; i < plans.length; i++) {
+  // 生成最终结论（使用智能生成器）
+  const generateFinalConclusionLocal = (completedTodos: TodoItem[]): string => {
+    return generateFinalConclusion(
+      completedTodos.map(todo => ({
+        title: todo.title,
+        result: todo.result
+      })),
+      inputText,
+      config.id
+    );
+  };
+
+  // 阶段一：问题分析与思考（流式输出）
+  const startThinkingPhase = async (controller: AbortController) => {
+    setAnalysisPhase('thinking');
+    const thinking = generateThinkingContentLocal(inputText);
+    setThinkingContent(thinking);
+    
+    // 等待流式输出完成（模拟）
+    await new Promise(resolve => setTimeout(resolve, thinking.length * 30));
+    
+    if (controller.signal.aborted) throw new Error('Analysis aborted');
+    
+    setThinkingComplete(true);
+    
+    // 短暂延迟后进入TODO阶段
+    await new Promise(resolve => setTimeout(resolve, 500));
+    if (controller.signal.aborted) throw new Error('Analysis aborted');
+  };
+
+  // 阶段二：执行TODO List
+  const executeTodoList = async (controller: AbortController) => {
+    setAnalysisPhase('todo-list');
+    const todos = generateTodoList(inputText);
+    setTodoList(todos);
+    
+    const completedTodos: TodoItem[] = [];
+    
+    for (let i = 0; i < todos.length; i++) {
       if (controller.signal.aborted) {
         throw new Error('Analysis aborted');
       }
 
-      // 更新当前步骤状态为运行中
-      setAnalysisSteps(prev => prev.map((step, index) => 
-        index === i ? { ...step, status: 'running' } : step
+      // 设置当前执行的TODO
+      setCurrentTodoIndex(i);
+      
+      // 更新TODO状态为运行中
+      setTodoList(prev => prev.map((todo, index) => 
+        index === i ? { ...todo, status: 'running' } : todo
       ));
 
-      // 模拟分析时间
-      await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 2000));
+      // 生成详细分析内容
+      const detailedAnalysis = generateDetailedAnalysisLocal(config.capabilities[i], inputText);
+      
+      // 流式输出详细分析过程
+      setTodoList(prev => prev.map((todo, index) => 
+        index === i ? { ...todo, detailedAnalysis } : todo
+      ));
+      
+      // 模拟分析时间（根据内容长度），等待流式输出完成
+      // 注意：实际的流式输出完成标记在StreamingText的onComplete回调中处理
+      await new Promise(resolve => setTimeout(resolve, detailedAnalysis.length * 20));
 
       if (controller.signal.aborted) {
         throw new Error('Analysis aborted');
       }
 
       // 生成分析结果
-      const result = generateAnalysisResult(config.capabilities[i], inputText);
-
-      // 更新步骤状态为完成，并添加结果
-      setAnalysisSteps(prev => prev.map((step, index) => 
-        index === i ? { 
-          ...step, 
-          status: 'completed',
-          showContent: true,
-          result: result
-        } : step
+      const result = generateAnalysisResultLocal(config.capabilities[i], inputText);
+      
+      // 更新TODO状态为完成，并添加结果
+      const completedTodo: TodoItem = {
+        ...todos[i],
+        status: 'completed',
+        detailedAnalysis,
+        result
+      };
+      
+      setTodoList(prev => prev.map((todo, index) => 
+        index === i ? completedTodo : todo
       ));
+      
+      completedTodos.push(completedTodo);
+      
+      // PlanningAgent判断：是否可以提前终止
+      if (shouldEarlyTerminate(completedTodos)) {
+        // 跳过剩余的TODO
+        setTodoList(prev => prev.map((todo, index) => 
+          index > i ? { ...todo, status: 'skipped' } : todo
+        ));
+        break;
+      }
+      
+      // 短暂延迟
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
+    
+    setCurrentTodoIndex(null);
+    return completedTodos;
+  };
 
-    setIsAnalyzing(false);
-    setAbortController(null);
+  // 阶段三：生成最终结论
+  const generateConclusionPhase = async (completedTodos: TodoItem[], controller: AbortController) => {
+    setAnalysisPhase('conclusion');
+    const conclusion = generateFinalConclusionLocal(completedTodos);
+    setFinalConclusion(conclusion);
+    
+    // 等待流式输出完成
+    await new Promise(resolve => setTimeout(resolve, conclusion.length * 30));
+    
+    if (controller.signal.aborted) throw new Error('Analysis aborted');
+    
+    setConclusionComplete(true);
+  };
+
+  // 开始完整分析过程
+  const startAnalysisProcess = async () => {
+    const controller = new AbortController();
+    setAbortController(controller);
+    
+    try {
+      // 阶段一：思考
+      await startThinkingPhase(controller);
+      
+      // 阶段二：执行TODO List
+      const completedTodos = await executeTodoList(controller);
+      
+      // 阶段三：生成结论
+      await generateConclusionPhase(completedTodos, controller);
+      
+      setIsAnalyzing(false);
+      setAbortController(null);
+    } catch (error: any) {
+      if (error.name !== 'AbortError' && error.message !== 'Analysis aborted') {
+        console.error('Analysis failed:', error);
+        message.error('分析过程中出现错误');
+      }
+      setIsAnalyzing(false);
+      setAbortController(null);
+    }
   };
 
   // 处理案例点击
@@ -265,7 +366,6 @@ export default function UniversalAgent({ config }: UniversalAgentProps) {
       setViewMode('analysis');
       setIsTransitioning(false);
       setIsAnalyzing(true);
-      setCurrentStep(0);
       startAnalysisProcess();
     }, 500);
   };
@@ -278,19 +378,26 @@ export default function UniversalAgent({ config }: UniversalAgentProps) {
     }
     setIsAnalyzing(false);
     
-    // 将所有运行中的步骤标记为已停止
-    setAnalysisSteps(prev => prev.map(step => 
-      step.status === 'running' ? { ...step, status: 'pending' } : step
+    // 将当前运行的TODO标记为已停止
+    setTodoList(prev => prev.map(todo => 
+      todo.status === 'running' ? { ...todo, status: 'pending' } : todo
     ));
+    setCurrentTodoIndex(null);
   };
 
   // 重新开始分析
   const restartAnalysis = () => {
     setViewMode('initial');
     setIsAnalyzing(false);
-    setAnalysisSteps([]);
-    setCurrentStep(0);
-    setExpandedPanels([]);
+    setAnalysisPhase('initial');
+    setThinkingContent('');
+    setThinkingComplete(false);
+    setTodoList([]);
+    setCurrentTodoIndex(null);
+    setExpandedTodos([]);
+    setStreamedTodos(new Set());
+    setFinalConclusion('');
+    setConclusionComplete(false);
     setInputText('');
     setLeftInputText('');
     if (abortController) {
@@ -327,19 +434,20 @@ export default function UniversalAgent({ config }: UniversalAgentProps) {
     );
   };
 
-  // 渲染分析结果
-  const renderAnalysisResult = (result: any) => {
-    if (!result) return null;
+  // 渲染完整分析结果（展开时显示）
+  const renderFullAnalysisResult = (result: any) => {
+    if (!result || !result.fullResult) return null;
 
-    switch (result.type) {
+    const { fullResult } = result;
+
+    switch (fullResult.type) {
       case 'clustering':
         return (
           <div>
-            <h3>聚类分析结果</h3>
-            <p>{result.data.summary}</p>
-            {result.data.clusters.map((cluster: any) => (
+            {/* 用户集群 */}
+            {fullResult.data.clusters.map((cluster: any) => (
               <Card key={cluster.id} size="small" style={{ marginBottom: 8 }}>
-                <div style={{ fontWeight: 500 }}>{cluster.name} ({cluster.count}个)</div>
+                <div style={{ fontWeight: 500 }}>{cluster.name} ({cluster.count}%)</div>
                 <Space wrap style={{ marginTop: 4 }}>
                   {cluster.keywords.map((kw: string) => (
                     <Tag key={kw}>#{kw}</Tag>
@@ -347,20 +455,169 @@ export default function UniversalAgent({ config }: UniversalAgentProps) {
                 </Space>
               </Card>
             ))}
+            
+            {/* 与大盘对比分析 */}
+            {fullResult.data.comparison && (
+              <Card size="small" style={{ marginTop: 12, background: '#f0f5ff', border: '1px solid #adc6ff' }}>
+                <div style={{ fontWeight: 500, marginBottom: 8, color: '#1890ff' }}>📊 与大盘用户分布对比</div>
+                {Object.entries(fullResult.data.comparison).map(([key, value]: [string, any]) => (
+                  <div key={key} style={{ marginBottom: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <span style={{ fontSize: 12 }}>{key}</span>
+                      <Space>
+                        <span style={{ fontSize: 12, color: '#8c8c8c' }}>大盘: {value.baseline}%</span>
+                        <span style={{ fontSize: 12, fontWeight: 500 }}>问题: {value.problem}%</span>
+                        <Tag 
+                          color={value.status === 'high' ? 'red' : value.status === 'missing' ? 'orange' : 'blue'}
+                        >
+                          {value.diff > 0 ? '+' : ''}{value.diff}%
+                        </Tag>
+                      </Space>
+                    </div>
+                    <Progress 
+                      percent={value.problem} 
+                      size="small" 
+                      showInfo={false}
+                      strokeColor={value.status === 'high' ? '#ff4d4f' : value.status === 'missing' ? '#faad14' : '#1890ff'}
+                    />
+                  </div>
+                ))}
+              </Card>
+            )}
+            
+            {/* 典型特征识别 */}
+            {fullResult.data.typicalFeatures && (
+              <Card size="small" style={{ marginTop: 12, background: '#fff7e6', border: '1px solid #ffd591' }}>
+                <div style={{ fontWeight: 500, marginBottom: 8, color: '#faad14' }}>🔍 典型特征识别</div>
+                {fullResult.data.typicalFeatures.map((feature: any, index: number) => (
+                  <div key={index} style={{ marginBottom: 8, paddingLeft: 8, borderLeft: '3px solid #faad14' }}>
+                    <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>
+                      {feature.type === 'single_platform' && '单端问题特征'}
+                      {feature.type === 'version_introduction' && '版本引入时间特征'}
+                      {feature.type === 'system_version' && '系统版本特征'}
+                      {feature.type === 'device_brand' && '品牌设备特征'}
+                      {feature.type === 'memory_config' && '内存配置特征'}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#595959', marginBottom: 4 }}>
+                      {feature.description}
+                    </div>
+                    <Tag color="green">置信度: {Math.round(feature.confidence * 100)}%</Tag>
+                  </div>
+                ))}
+              </Card>
+            )}
+            
+            {/* 推理线索 */}
+            {fullResult.data.inference && (
+              <Card size="small" style={{ marginTop: 12, background: '#f6ffed', border: '1px solid #b7eb8f' }}>
+                <div style={{ fontWeight: 500, marginBottom: 8, color: '#52c41a' }}>💡 推理线索</div>
+                <div style={{ marginBottom: 8 }}>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: '#52c41a', marginBottom: 4 }}>排查方向应聚焦：</div>
+                  <Space wrap>
+                    {fullResult.data.inference.focus.map((item: string, index: number) => (
+                      <Tag key={index} color="green">{item}</Tag>
+                    ))}
+                  </Space>
+                </div>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: '#faad14', marginBottom: 4 }}>可以排除：</div>
+                  <Space wrap>
+                    {fullResult.data.inference.exclude.map((item: string, index: number) => (
+                      <Tag key={index} color="default">{item}</Tag>
+                    ))}
+                  </Space>
+                </div>
+              </Card>
+            )}
           </div>
         );
       
       case 'change':
         return (
           <div>
-            <h3>变更分析结果</h3>
-            <p>{result.data.summary}</p>
-            {result.data.changes.map((change: any) => (
-              <Card key={change.id} size="small" style={{ marginBottom: 8 }}>
-                <div style={{ fontWeight: 500 }}>{change.description}</div>
-                <div style={{ fontSize: 12, color: '#8c8c8c', marginTop: 4 }}>
-                  {change.type} · {change.time} · 影响程度: {change.impact}
+            {fullResult.data.changes.map((change: any) => (
+              <Card 
+                key={change.id} 
+                size="small" 
+                style={{ 
+                  marginBottom: 8,
+                  borderLeft: change.type === 'Switch变更' ? '3px solid #1890ff' : '3px solid #52c41a'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <Tag color={change.type === 'Switch变更' ? 'blue' : 'green'}>
+                    {change.type === 'Switch变更' ? '🔧 Switch' : '🧪 实验'}
+                  </Tag>
+                  <span style={{ fontWeight: 500, fontSize: 13 }}>
+                    {change.name || change.experimentId}
+                  </span>
+                  {change.impact === 'high' && (
+                    <Tag color="red">高影响</Tag>
+                  )}
                 </div>
+                <div style={{ fontSize: 13, color: '#262626', marginBottom: 4 }}>
+                  {change.description}
+                </div>
+                <div style={{ fontSize: 12, color: '#8c8c8c', marginTop: 4 }}>
+                  <Space split={<span style={{ margin: '0 4px' }}>·</span>}>
+                    <span>时间: {change.time}</span>
+                    {change.operator && <span>操作人: {change.operator}</span>}
+                    {change.scope && <span>影响范围: {change.scope}</span>}
+                    {change.experimentId && <span>实验ID: {change.experimentId}</span>}
+                  </Space>
+                </div>
+                
+                {/* 实验命中率对比分析 */}
+                {change.hitRateComparison && (
+                  <div style={{ 
+                    marginTop: 8, 
+                    padding: 8, 
+                    background: '#fff7e6', 
+                    borderRadius: 4,
+                    border: '1px solid #ffd591'
+                  }}>
+                    <div style={{ fontSize: 12, fontWeight: 500, color: '#faad14', marginBottom: 4 }}>
+                      🎯 实验命中率对比分析
+                    </div>
+                    <div style={{ fontSize: 12, color: '#595959' }}>
+                      <div>命中实验用户问题率: <span style={{ fontWeight: 500, color: '#ff4d4f' }}>{change.hitRateComparison.hitProblemRate}%</span></div>
+                      <div>未命中实验用户问题率: <span style={{ fontWeight: 500, color: '#52c41a' }}>{change.hitRateComparison.notHitProblemRate}%</span></div>
+                      <div style={{ marginTop: 4 }}>
+                        差异: <Tag color={change.hitRateComparison.status === 'extreme' ? 'red' : 'orange'}>
+                          {change.hitRateComparison.diff > 0 ? '+' : ''}{change.hitRateComparison.diff}%
+                        </Tag>
+                        {change.hitRateComparison.status === 'extreme' && (
+                          <Tag color="red" style={{ marginLeft: 4 }}>极度异常</Tag>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* 时间关联分析 */}
+                {change.timeMatch && (
+                  <div style={{ 
+                    marginTop: 8, 
+                    padding: 8, 
+                    background: '#f0f5ff', 
+                    borderRadius: 4,
+                    border: '1px solid #adc6ff'
+                  }}>
+                    <div style={{ fontSize: 12, fontWeight: 500, color: '#1890ff', marginBottom: 4 }}>
+                      ⏰ 时间关联分析
+                    </div>
+                    <div style={{ fontSize: 12, color: '#595959' }}>
+                      <div>实验变更时间: {change.timeMatch.experimentTime}</div>
+                      <div>问题开始时间: {change.timeMatch.problemStartTime}</div>
+                      <div style={{ marginTop: 4 }}>
+                        时间吻合度: <Tag color="blue">{change.timeMatch.matchRate}%</Tag>
+                        {change.timeMatch.matchRate === 100 && (
+                          <Tag color="red" style={{ marginLeft: 4 }}>强烈暗示实验导致问题</Tag>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </Card>
             ))}
           </div>
@@ -369,9 +626,7 @@ export default function UniversalAgent({ config }: UniversalAgentProps) {
       case 'log':
         return (
           <div>
-            <h3>日志分析结果</h3>
-            <p>{result.data.summary}</p>
-            {result.data.errors.map((error: any, index: number) => (
+            {fullResult.data.errors.map((error: any, index: number) => (
               <div key={index} style={{ marginBottom: 8 }}>
                 <Tag color={error.level === 'ERROR' ? 'red' : 'orange'}>
                   {error.level}
@@ -385,9 +640,7 @@ export default function UniversalAgent({ config }: UniversalAgentProps) {
       case 'code':
         return (
           <div>
-            <h3>代码分析结果</h3>
-            <p>{result.data.summary}</p>
-            {result.data.issues.map((issue: any, index: number) => (
+            {fullResult.data.issues.map((issue: any, index: number) => (
               <Card key={index} size="small" style={{ marginBottom: 8 }}>
                 <div style={{ fontWeight: 500 }}>{issue.type}</div>
                 <div style={{ fontSize: 12, color: '#8c8c8c' }}>
@@ -399,13 +652,14 @@ export default function UniversalAgent({ config }: UniversalAgentProps) {
         );
       
       default:
-        return (
-          <div>
-            <h3>分析结果</h3>
-            <p>{result.data.summary}</p>
-          </div>
-        );
+        return null;
     }
+  };
+
+  // 截断文本（用于左侧卡片摘要）
+  const truncateText = (text: string, maxLength: number = 80): string => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
   };
 
   return (
@@ -679,8 +933,9 @@ export default function UniversalAgent({ config }: UniversalAgentProps) {
             transform: isTransitioning ? 'translateY(20px)' : 'translateY(0)',
             transition: 'all 0.5s ease-in-out'
           }}>
-            <Row gutter={24} style={{ height: '100vh' }}>
-              {/* 左侧分析过程 */}
+            {/* 从思考阶段开始就显示左右两栏结构 */}
+            <Row gutter={24} style={{ minHeight: 'calc(100vh - 100px)' }}>
+              {/* 左侧：PlanningAgent - 思考内容、TODO卡片列表和最终结论 */}
               <Col span={10}>
                 <div style={{ 
                   height: '100%', 
@@ -699,7 +954,8 @@ export default function UniversalAgent({ config }: UniversalAgentProps) {
                     alignItems: 'center'
                   }}>
                     <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
-                      分析过程
+                      <BulbOutlined style={{ marginRight: 8, color: '#1890ff' }} />
+                      PlanningAgent
                     </h3>
                     <Space>
                       {isAnalyzing && (
@@ -722,120 +978,243 @@ export default function UniversalAgent({ config }: UniversalAgentProps) {
                     </Space>
                   </div>
 
-                  {/* 分析步骤列表 */}
-                  <div style={{ 
-                    flex: 1, 
-                    overflow: 'auto', 
-                    padding: '16px 20px'
-                  }}>
+                  {/* 思考内容、TODO列表和结论 */}
+                  <div 
+                    ref={leftPanelScrollRef}
+                    style={{ 
+                      flex: 1, 
+                      overflow: 'auto', 
+                      padding: '16px 20px'
+                    }}
+                  >
                     <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                      {analysisSteps.map((step, index) => (
-                        <div
-                          key={step.key}
+                      {/* 阶段一：问题分析与思考（显示在左侧面板顶部，始终保留） */}
+                      {thinkingContent && (
+                        <Card
+                          size="small"
                           style={{
-                            background: currentStep === index ? '#f6ffed' : '#fff',
-                            border: currentStep === index ? '2px solid #1890ff' : 
-                                   step.status === 'running' ? '2px solid #52c41a' : '1px solid #e8e8e8',
+                            background: '#fff7e6',
+                            border: '1px solid #ffd591',
                             borderRadius: 8,
-                            cursor: 'pointer',
-                            transition: 'all 0.3s',
-                          }}
-                          onClick={() => {
-                            setCurrentStep(index);
-                            if (step.showContent) {
-                              if (expandedPanels.includes(step.key)) {
-                                setExpandedPanels(expandedPanels.filter((k: string) => k !== step.key));
-                              } else {
-                                setExpandedPanels([...expandedPanels, step.key]);
-                              }
-                            }
                           }}
                         >
-                          <div style={{ padding: '12px 16px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                {step.status === 'running' && <LoadingOutlined spin />}
-                                {step.status === 'completed' && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#52c41a' }}></div>}
-                                {step.status === 'pending' && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#d9d9d9' }}></div>}
-                                <span style={{ fontWeight: 500, fontSize: 14 }}>{step.title}</span>
-                              </div>
+                          <div style={{ padding: '8px 0' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                              <BulbOutlined style={{ color: '#faad14', fontSize: 16 }} />
+                              <span style={{ fontWeight: 500, fontSize: 14 }}>问题分析与思考</span>
                             </div>
-                            
-                            <div style={{ fontSize: 12, color: '#8c8c8c', marginTop: 4, marginLeft: 14 }}>
-                              目标：{step.target}
-                            </div>
-
-                            {expandedPanels.includes(step.key) && step.showContent && (
-                              <div style={{ 
-                                marginTop: 12, 
-                                marginLeft: 14,
-                                paddingTop: 12,
-                                borderTop: '1px solid #f0f0f0'
-                              }}>
-                                <div style={{ fontSize: 13, color: '#595959', marginBottom: 8 }}>
-                                  {step.content}
-                                </div>
-                                {step.result && renderAnalysisResult(step.result)}
+                            {analysisPhase === 'thinking' ? (
+                              <StreamingText 
+                                text={thinkingContent}
+                                speed={30}
+                                autoScroll={true}
+                                scrollContainerRef={leftPanelScrollRef}
+                                style={{ fontSize: 13, lineHeight: 1.8, color: '#262626' }}
+                              />
+                            ) : (
+                              <div style={{ fontSize: 13, lineHeight: 1.8, color: '#262626', whiteSpace: 'pre-wrap' }}>
+                                {thinkingContent}
                               </div>
                             )}
                           </div>
-                        </div>
-                      ))}
+                        </Card>
+                      )}
+
+                      {/* 阶段二和阶段三：TODO卡片列表 */}
+                      {(analysisPhase === 'todo-list' || analysisPhase === 'conclusion') && todoList.map((todo, index) => {
+                          const isExpanded = expandedTodos.includes(todo.key);
+                          const isSelected = currentTodoIndex === index;
+                          
+                          return (
+                            <Card
+                              key={todo.key}
+                              size="small"
+                              style={{
+                                background: isSelected ? '#f6ffed' : '#fff',
+                                border: isSelected ? '2px solid #1890ff' : 
+                                       todo.status === 'running' ? '2px solid #52c41a' : 
+                                       todo.status === 'completed' ? '1px solid #52c41a' :
+                                       todo.status === 'skipped' ? '1px solid #d9d9d9' : '1px solid #e8e8e8',
+                                borderRadius: 8,
+                                cursor: 'pointer',
+                                transition: 'all 0.3s',
+                              }}
+                              onClick={() => {
+                                if (todo.status !== 'pending' && todo.status !== 'skipped') {
+                                  setCurrentTodoIndex(index);
+                                }
+                              }}
+                            >
+                              <div style={{ padding: '8px 0' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    {todo.status === 'running' && <LoadingOutlined spin style={{ color: '#52c41a' }} />}
+                                    {todo.status === 'completed' && <CheckCircleOutlined style={{ color: '#52c41a' }} />}
+                                    {todo.status === 'pending' && <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#d9d9d9' }}></div>}
+                                    {todo.status === 'skipped' && <Tag color="default">已跳过</Tag>}
+                                    <span style={{ fontWeight: 500, fontSize: 14 }}>{todo.title}</span>
+                                  </div>
+                                  {todo.status === 'completed' && todo.result && (
+                                    <Button
+                                      type="text"
+                                      size="small"
+                                      icon={isExpanded ? <UpOutlined /> : <DownOutlined />}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (isExpanded) {
+                                          setExpandedTodos(expandedTodos.filter(k => k !== todo.key));
+                                        } else {
+                                          setExpandedTodos([...expandedTodos, todo.key]);
+                                        }
+                                      }}
+                                    />
+                                  )}
+                                </div>
+                                
+                                {/* 分析目标 */}
+                                <div style={{ fontSize: 12, color: '#8c8c8c', marginBottom: 8, marginLeft: 24 }}>
+                                  📝 {todo.target}
+                                </div>
+
+                                {/* 结果摘要（完成后显示） */}
+                                {todo.status === 'completed' && todo.result && (
+                                  <div style={{ 
+                                    marginLeft: 24,
+                                    padding: '8px 12px',
+                                    background: '#f6ffed',
+                                    borderRadius: 4,
+                                    border: '1px solid #b7eb8f'
+                                  }}>
+                                    <div style={{ fontSize: 12, fontWeight: 500, color: '#389e0d', marginBottom: 4 }}>
+                                      ✅ 分析结果
+                                    </div>
+                                    <div style={{ fontSize: 13, color: '#262626' }}>
+                                      {truncateText(todo.result.summary, 80)}
+                                    </div>
+                                    {todo.result.confidence >= 0.9 && (
+                                      <Tag color="green" style={{ marginTop: 4 }}>
+                                        高置信度 ({Math.round(todo.result.confidence * 100)}%)
+                                      </Tag>
+                                    )}
+                                  </div>
+                                )}
+
+                                {/* 展开显示完整结果 */}
+                                {isExpanded && todo.result && (
+                                  <div style={{ 
+                                    marginTop: 12, 
+                                    marginLeft: 24,
+                                    paddingTop: 12,
+                                    borderTop: '1px solid #f0f0f0'
+                                  }}>
+                                    <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 8, color: '#595959' }}>
+                                      完整分析结果：
+                                    </div>
+                                    {renderFullAnalysisResult(todo.result)}
+                                  </div>
+                                )}
+                              </div>
+                            </Card>
+                          );
+                        })}
+
+                      {/* 最终结论（阶段三） */}
+                      {analysisPhase === 'conclusion' && finalConclusion && (
+                        <Card
+                          style={{
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            border: 'none',
+                            borderRadius: 8,
+                            marginTop: 16
+                          }}
+                        >
+                          <div style={{ color: '#fff' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                              <CheckCircleOutlined style={{ fontSize: 20 }} />
+                              <span style={{ fontSize: 16, fontWeight: 600 }}>最终结论</span>
+                            </div>
+                            <StreamingText 
+                              text={finalConclusion}
+                              speed={30}
+                              autoScroll={true}
+                              scrollContainerRef={leftPanelScrollRef}
+                              style={{ fontSize: 14, lineHeight: 1.8, color: '#fff' }}
+                            />
+                          </div>
+                        </Card>
+                      )}
                     </Space>
                   </div>
 
-                  {/* 底部输入框 */}
-                  <div style={{ 
-                    padding: '12px 20px', 
-                    borderTop: '1px solid #f0f0f0',
-                    background: '#fafafa'
-                  }}>
-                    <Space.Compact style={{ width: '100%' }}>
-                      <Input
-                        value={leftInputText}
-                        onChange={(e) => setLeftInputText(e.target.value)}
-                        placeholder="随时输入问题或打断分析..."
-                        style={{ flex: 1 }}
-                        size="small"
-                        onPressEnter={() => {
-                          if (leftInputText.trim()) {
-                            message.info(`收到您的问题: ${leftInputText}`);
-                            setLeftInputText('');
-                          }
-                        }}
-                      />
-                      <Button 
-                        size="small" 
-                        type="primary" 
-                        icon={<SendOutlined />}
-                        onClick={() => {
-                          if (leftInputText.trim()) {
-                            message.info(`收到您的问题: ${leftInputText}`);
-                            setLeftInputText('');
-                          }
-                        }}
-                      />
-                    </Space.Compact>
+                    {/* 底部输入框 */}
+                    <div style={{ 
+                      padding: '12px 20px', 
+                      borderTop: '1px solid #f0f0f0',
+                      background: '#fafafa'
+                    }}>
+                      <Space.Compact style={{ width: '100%' }}>
+                        <Input
+                          value={leftInputText}
+                          onChange={(e) => setLeftInputText(e.target.value)}
+                          placeholder="随时输入问题或打断分析..."
+                          style={{ flex: 1 }}
+                          size="small"
+                          onPressEnter={() => {
+                            if (leftInputText.trim()) {
+                              stopAnalysis();
+                              message.info(`已打断分析，收到您的问题: ${leftInputText}`);
+                              setLeftInputText('');
+                            }
+                          }}
+                        />
+                        <Button 
+                          size="small" 
+                          type="primary" 
+                          icon={<SendOutlined />}
+                          onClick={() => {
+                            if (leftInputText.trim()) {
+                              stopAnalysis();
+                              message.info(`已打断分析，收到您的问题: ${leftInputText}`);
+                              setLeftInputText('');
+                            }
+                          }}
+                        />
+                      </Space.Compact>
+                    </div>
                   </div>
-                </div>
-              </Col>
+                </Col>
 
-              {/* 右侧详细结果 */}
+              {/* 右侧：详细分析过程面板 */}
               <Col span={14}>
                 <Card 
                   style={{ height: '100%' }}
                   title={
-                    analysisSteps[currentStep] ? (
-                      <Space>
-                        <span>{analysisSteps[currentStep].title}</span>
-                        {analysisSteps[currentStep].status === 'running' && <LoadingOutlined spin />}
-                        {analysisSteps[currentStep].status === 'completed' && <Badge status="success" />}
-                      </Space>
-                    ) : '分析结果'
+                    currentTodoIndex !== null && todoList[currentTodoIndex] ? (
+                      `分析详情-${todoList[currentTodoIndex].title}`
+                    ) : analysisPhase === 'thinking' ? (
+                      '分析详情'
+                    ) : '分析详情'
                   }
                 >
-                  <div style={{ height: 'calc(100vh - 200px)', overflow: 'auto' }}>
-                    {!analysisSteps[currentStep] ? (
+                  <div 
+                    ref={rightPanelScrollRef}
+                    style={{ height: 'calc(100vh - 200px)', overflow: 'auto' }}
+                  >
+                    {/* 思考阶段：显示占位提示 */}
+                    {analysisPhase === 'thinking' ? (
+                      <div style={{ 
+                        height: '100%', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        color: '#8c8c8c'
+                      }}>
+                        <div style={{ textAlign: 'center' }}>
+                          <BulbOutlined style={{ fontSize: 48, marginBottom: 16, color: '#faad14' }} />
+                          <div>正在分析问题，请稍候...</div>
+                        </div>
+                      </div>
+                    ) : currentTodoIndex === null ? (
                       <div style={{ 
                         height: '100%', 
                         display: 'flex', 
@@ -845,72 +1224,90 @@ export default function UniversalAgent({ config }: UniversalAgentProps) {
                       }}>
                         <div style={{ textAlign: 'center' }}>
                           <AimOutlined style={{ fontSize: 48, marginBottom: 16 }} />
-                          <div>等待分析开始...</div>
+                          <div>点击左侧TODO卡片查看详细分析过程</div>
                         </div>
                       </div>
-                    ) : !analysisSteps[currentStep]?.result ? (
-                      <Space direction="vertical" size="large" style={{ width: '100%' }}>
-                        <div>
-                          <h2 style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>
-                            {analysisSteps[currentStep]?.title}
-                          </h2>
-                          <p style={{ color: '#8c8c8c', marginTop: 8, fontSize: 14 }}>
-                            目标：{analysisSteps[currentStep]?.target}
-                          </p>
-                        </div>
-
-                        <Card>
-                          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>
-                            分析内容
-                          </div>
-                          <div style={{ fontSize: 13, color: '#595959', lineHeight: 1.6 }}>
-                            {analysisSteps[currentStep]?.content}
-                          </div>
-                        </Card>
-
-                        <div style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          justifyContent: 'center', 
-                          padding: '40px 0'
-                        }}>
-                          <Space direction="vertical" size={16} style={{ textAlign: 'center' }}>
-                            {analysisSteps[currentStep].status === 'running' ? (
-                              <>
-                                <LoadingOutlined style={{ fontSize: 48, color: '#1890ff' }} spin />
-                                <div style={{ fontSize: 16, color: '#595959' }}>
-                                  正在执行分析...
-                                </div>
-                                <div style={{ fontSize: 14, color: '#8c8c8c' }}>
-                                  请稍候，分析结果即将呈现
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                <div style={{ fontSize: 48 }}>⏳</div>
-                                <div style={{ fontSize: 16, color: '#8c8c8c' }}>
-                                  等待执行
-                                </div>
-                                <div style={{ fontSize: 14, color: '#bfbfbf' }}>
-                                  将在前序步骤完成后开始执行
-                                </div>
-                              </>
-                            )}
-                          </Space>
-                        </div>
-                      </Space>
                     ) : (
                       <Space direction="vertical" size="large" style={{ width: '100%' }}>
                         <div>
                           <h2 style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>
-                            {analysisSteps[currentStep]?.title}
+                            {todoList[currentTodoIndex].title}
                           </h2>
                           <p style={{ color: '#8c8c8c', marginTop: 8, fontSize: 14 }}>
-                            分析已完成
+                            目标：{todoList[currentTodoIndex].target}
                           </p>
                         </div>
-                        
-                        {renderAnalysisResult(analysisSteps[currentStep].result)}
+
+                        {/* 详细分析过程（根据是否已流式输出决定显示方式） */}
+                        {todoList[currentTodoIndex].detailedAnalysis ? (
+                          <Card>
+                            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>
+                              🧠 详细分析过程
+                            </div>
+                            {streamedTodos.has(todoList[currentTodoIndex].key) ? (
+                              // 已完成流式输出，直接显示完整文本
+                              <div style={{ fontSize: 13, lineHeight: 1.8, color: '#595959', whiteSpace: 'pre-wrap' }}>
+                                {todoList[currentTodoIndex].detailedAnalysis}
+                              </div>
+                            ) : (
+                              // 首次分析，使用流式输出
+                              <StreamingText 
+                                text={todoList[currentTodoIndex].detailedAnalysis}
+                                speed={20}
+                                autoScroll={true}
+                                scrollContainerRef={rightPanelScrollRef}
+                                onComplete={() => {
+                                  // 流式输出完成后，添加到streamedTodos
+                                  setStreamedTodos(prev => new Set(prev).add(todoList[currentTodoIndex].key));
+                                }}
+                                style={{ fontSize: 13, lineHeight: 1.8, color: '#595959', whiteSpace: 'pre-wrap' }}
+                              />
+                            )}
+                          </Card>
+                        ) : todoList[currentTodoIndex].status === 'running' ? (
+                            <Card>
+                              <div style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                padding: '40px 0'
+                              }}>
+                                <Space direction="vertical" size={16} style={{ textAlign: 'center' }}>
+                                  <LoadingOutlined style={{ fontSize: 48, color: '#1890ff' }} spin />
+                                  <div style={{ fontSize: 16, color: '#595959' }}>
+                                    正在执行分析...
+                                  </div>
+                                </Space>
+                              </div>
+                            </Card>
+                          ) : (
+                            <Card>
+                              <div style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                padding: '40px 0'
+                              }}>
+                                <div style={{ fontSize: 48 }}>⏳</div>
+                                <div style={{ fontSize: 16, color: '#8c8c8c', marginTop: 16 }}>
+                                  等待执行
+                                </div>
+                              </div>
+                            </Card>
+                          )}
+
+                          {/* 分析结果（如果已完成） */}
+                          {todoList[currentTodoIndex].status === 'completed' && todoList[currentTodoIndex].result && (
+                            <Card>
+                              <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>
+                                ✅ 分析结果
+                              </div>
+                              <div style={{ fontSize: 13, color: '#262626', marginBottom: 12 }}>
+                                {todoList[currentTodoIndex].result.summary}
+                              </div>
+                              {renderFullAnalysisResult(todoList[currentTodoIndex].result)}
+                            </Card>
+                        )}
                       </Space>
                     )}
                   </div>
